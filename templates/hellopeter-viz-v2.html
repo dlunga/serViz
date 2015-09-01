@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Customer Service Mapping</title>
+    {% load staticfiles %}
+    {#<meta charset="utf-8">#}
+    <title>Data Filter</title>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script> 
+    <script type="text/javascript" src="{% static 'lib/d3.js' %}"></script> 
+    <script type="text/javascript" src="{% static 'local/hellopeter13.js' %}"></script>  
+    <script type="text/javascript" src="{% static 'external/crossfilter.v1.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/crossfilter.v1.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/d3.v3.min.js' %}"></script>	
+	<script type="text/javascript" src="{% static 'external/d3.v3.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/d3.v2.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/d3.v2.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/markerclusterer.js' %}"></script>
+    
+    <!--<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&region=ES"></script> -->
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+    <!--<script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script> -->
+     <!--<link rel="stylesheet" type="text/css" href="{% static 'css/mapd.css' %}"/> -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/hellopeterv2.css' %}"/>
+    
+    
+    
+    
+    <!--
+    <script type="text/javascript" src="{% static 'external/d3.tip.v0.6.3.js' %}"></script>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.2.min.js"></script> 
+    <script type="text/javascript" src="{% static 'external/jquery.tipsy.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/tipsy.css' %}"/> -->
+</head>
+<script>
+        var serviceComments = {{ service_reports | safe }};
+		document.addEventListener('DOMContentLoaded', init, false);
+		//document.addEventListener('DOMContentLoaded', initialize, false);	
+		//google.maps.event.addDomListener(window, 'load', init);
+</script>
+
+ <body>
+	 	<div id="topbar">
+	 		<div id="settings" class="settings">
+	      			<!--<button id="pointButton" class="settings-button" title="Points">Points</button>-->
+	      			<button id="basemapButton" class="settings-button" title="Basemap">Basemap</button>
+	      			<button id="basemapSelect" class="settings-drop-button" data-dropdown="#baseDropdown">▾</button>
+	      			<button id="heatButton" class="settings-button" title="Heatmap">Heatmap</button>
+	      			<button id="heatSelect" class="settings-drop-button" data-dropdown="#heatDropdown">▾</button>
+	    	</div>
+	 		   
+	    	<div id="promo"><a href="" target="_blank"><img src="{% static "images/customerservice.jpg" %}" class="logo-image"></a></div>
+  	<!-- search form for filtering results -->    
+		    <form id="search" action=".">	    	
+		    	
+		    	<!--<input id="submit" class="search-input" type="submit"></button> -->
+		    	<button id="submit" class="search-input" type="button" onclick="handleSubmit()">Submit</button>
+		    	<!-- <input id="industryInput" class="search-input" type="text" name="industries" placeholder="Industry"/> -->
+		    	<input id="supplierInput" class="search-input" type="text" name="suppliers" placeholder="Search, e.g absa"/>
+		    	<!--  <input id="supplierInput" class="search-input" type="text" name="suppliers" placeholder="Search, e.g absa" onkeypress="console.log('happy days'); event.preventDefault()"/> -->
+	
+		      	
+		      	
+		      	
+		      	<!--
+				<div id="industry" class="search">
+				  	 <input id="industryInput" class="search-input" type="text" name="industries" placeholder="Industry"/>
+				</div>
+				<div id="supplier" class="search">
+				  	 <input id="supplierInput" class="search-input" type="text" name="suppliers" placeholder="Supplier"/>				
+				</div>
+				-->
+				
+		      </form>
+	    
+	   </div>
+   	<!-- container for displaying the map -->
+	   <div id="main">
+	      <div id="hellopetermapview">
+	      		<!--<div id="map-canvas"></div> -->
+	        	<div id="hellomap"></div>  
+	      </div>
+	    </div>
+    <!-- container for displaying the service reports -->
+  
+     <div id="hellocontrol">
+     	<div id="histogramnote" align="center" >Hover over each box to see customer comment text. 
+     		<!-- Green (<svg id="svgHist" xmlns="http://www.w3.org/2000/svg" width="12" height="12"> <rect x="2" y="0" rx="15" ry="2" width="11" height="15" fill="green" stroke="green" stroke-width="3"/></svg>) indicates a compliment.
+     		Red (<svg id="svgHist" xmlns="http://www.w3.org/2000/svg" width="12" height="12"> <rect x="2" y="0" rx="15" ry="2" width="11" height="15" fill="red" stroke="red" stroke-width="3"/></svg>) indicates a complaint. -->
+        </div>
+        
+     	<table id="supplierstable"></table>
+     	
+     	<div id="sentiment_div"></div>
+     	<div id="sentiment_div2"></div>
+     	
+     	
+     		    <!--	 
+        		<div id="reports" class="list"></div>  --> 		
+    	
+    </div>	
+    
+    -->
+ 	<!-- charts to be used as interactive filters -->	      
+	 <div id="timechartcontainer">
+			 <div id="servicetime-chart" class="chart"> 
+			  <!-- <div id="servicetime-chart"> -->
+			    <div class="title">Hour Filter</div>
+			  </div>		  
+    </div>
+		
+	<div id="datechartcontainer">
+	
+			<!-- <div id="servicedate-chart"> -->	  
+			    <div id="servicedate-chart" class="chart">
+			    <div class="title">Date Filter</div>
+			</div>  
+	</div>
+		
+	<!--	<div id="helloInfo">
+			    <div id="hellotitle">Service Report Advanced Text Analytics Window</div>   		
+        		<div id="hellonote">The interactive visualization includes more than 250,000 customer service reports extracted from the HelloPeter Website. The database 
+        			consists of geomapped customer complaints as well as compliments that captures over 5,000 service providers across South Africa from May 2013 to date.
+        		</div>
+    	</div>
+	
+		<div id="lists">
+		  <div id="service-list" class="list"></div>
+		</div>
+	-->
+		<div id="bottomBar"></div>
+	
+		<!-- set menu for properties to appear on the map  -->
+		<div id="baseDropdown" class="dropdown dropdown-anchor-right">
+	        <ul id="baseMenu"class="dropdown-menu drop-menu">      
+	        </ul>
+	    </div>
+	       
+	    <div id="heatDropdown" class="dropdown dropdown-anchor-right">
+	      <ul id="heatMenu" class="dropdown-menu drop-menu">
+	      </ul>
+	    </div>
+    
+ </body>
+</html>

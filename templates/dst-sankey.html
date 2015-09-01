@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<script type="text/javascript" src="http://d3js.org/d3.v2.js"></script>
+<script type="text/javascript" src="https://raw.github.com/cfergus/d3-plugins/master/sankey/sankey.js"></script>
+
+<title>South African Government Total Budget Flow</title>
+<style>
+
+#chart {
+  margin-top: 30px;
+  margin-bottom: 50px;
+  margin-left: 40px;
+  height: 100%;
+}
+
+.node rect {
+  cursor: move;
+  fill-opacity: .9;
+  shape-rendering: crispEdges;
+}
+
+.node text {
+  pointer-events: none;
+  text-shadow: 0 1px 0 #fff;
+}
+
+.link {
+  fill: none;
+  stroke: #000;
+  stroke-opacity: .2;
+}
+
+
+.cycleLink {
+  fill: none;
+  stroke: #300;
+  stroke-opacity: .2;
+}
+
+.cycleLink:hover {
+  stroke-opacity: .5;
+}
+
+.link:hover {
+  stroke-opacity: .5;
+}
+
+</style>
+</head>
+<body>
+
+<div style="position:relative;height:220px;margin-top:50px;">
+  <!-- <div style="opacity:0.5;position:absolute;left:50px;top:-30px;width:300px;height:150px;background-color:#40B3DF"></div> 
+  <div style="opacity:0.3;position:absolute;left:120px;top:20px;width:100px;height:170px;background-color:#8AC007"></div> -->
+  <div style="margin-top:30px;width:650px;height:60px;margin-left: 40px;padding:20px;border-radius:10px;border:10px solid #EE872A;font-size:120%;">
+	<h1>Total Government vs STA Expenditure</h1>
+   </div>
+</div>
+
+
+<p id="chart"></p>
+
+<script>
+
+var margin = {top: 1, right: 1, bottom: 6, left: 1},
+   // width = 2000 - margin.left - margin.right,
+    //height = 2000 - margin.top - margin.bottom;
+    width =  window.innerWidth;
+    height = window.innerHeight;
+
+var formatNumber = d3.format(",.0f"),
+    format = function(d) { return formatNumber(d) + " tuples"; },
+    color = d3.scale.category20();
+
+var svg = d3.select("#chart").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+var sankey = d3.sankey()
+    .nodeWidth(15)
+    .nodePadding(10)
+    .size([width, height]);
+
+var path = sankey.link();
+
+function createChart( energy ) {
+  sankey
+      .nodes(energy.nodes)
+      .links(energy.links)
+      .layout(32);
+
+  var link = svg.append("g").selectAll(".link")
+      .data(energy.links)
+    .enter().append("path")
+      .attr("class", function(d) { return (d.causesCycle ? "cycleLink" : "link") })
+      .attr("d", path)
+      .style("stroke-width", function(d) { return Math.max(1, d.dy); })
+      .sort(function(a, b) { return b.dy - a.dy; });
+
+  link.append("title")
+      .text(function(d) { return d.source.name + " -> " + d.target.name + "\n" + format(d.value); });
+
+  var node = svg.append("g").selectAll(".node")
+      .data(energy.nodes)
+    .enter().append("g")
+      .attr("class", "node")
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+    .call(d3.behavior.drag()
+      .origin(function(d) { return d; })
+      .on("dragstart", function() { this.parentNode.appendChild(this); })
+      .on("drag", dragmove));
+
+  node.append("rect")
+      .attr("height", function(d) { return d.dy; })
+      .attr("width", sankey.nodeWidth())
+      .style("fill", function(d) { return d.color = color(d.name.replace(/ .*/, "")); })
+      .style("stroke", function(d) { return d3.rgb(d.color).darker(2); })
+    .append("title")
+      .text(function(d) { return d.name + "\n" + format(d.value); });
+
+  node.append("text")
+      .attr("x", -6)
+      .attr("y", function(d) { return d.dy / 2; })
+      .attr("dy", ".35em")
+      .attr("text-anchor", "end")
+      .attr("transform", null)
+      .text(function(d) { return d.name; })
+    .filter(function(d) { return d.x < width / 2; })
+      .attr("x", 6 + sankey.nodeWidth())
+      .attr("text-anchor", "start");
+
+  function dragmove(d) {
+    d3.select(this).attr("transform", "translate(" + d.x + "," + (d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))) + ")");
+    sankey.relayout();
+    link.attr("d", path);
+  }
+  
+};
+/*
+var sta_dst_data ={"nodes":[
+{"name":"Government Total Budget"}, //0
+{"name":"Central Government Administration"}, //1
+{"name":"Financial and Administration Services"}, //2
+{"name":"Social Services"},//3
+{"name":"Justice, Crime Prevention and Security"},//4
+{"name":"Economic Services and Infrastructure"},//5
+{"name":"Cooperative Governance"}, //6
+{"name":"Home Affairs"},//7
+{"name":"Public Works"}, //8
+{"name":"Public Enteprises"}, //9
+{"name":"Public Service Administration"},//10
+{"name":"Arts and Culture"},//11
+{"name":"Basic Education"},//12
+{"name":"Health"},//13
+{"name":"Higher Education"},//14
+{"name":"Labour"},//15
+{"name":"Social Development"},//16
+{"name":"Sport and Recreation"},//17
+{"name":"Defence and Millitary Veterans"},//18
+{"name":"Police"},//19
+{"name":"Agriculture, Forestry and Fisheries"},//20
+{"name":"Communications"},//21
+{"name":"Energy"},//22
+{"name":"Environmental Affairs"},//23
+{"name":"Human Settlements"},//24
+{"name":"Mineral Resources"},//25
+{"name":"Rural Development"},//26
+{"name":"Science and Technology"},//27
+{"name":"Trade and Industry"},//28
+{"name":"Statistics SA"},//29
+{"name":"Correctional Services"},//30
+{"name":"National Treasury"},//31
+{"name":"Tourism"},//32
+{"name":"Transport"},//33
+{"name":"Water Affairs"},//34
+],
+"links":[
+{"source":0,"target":1,"value":147}, //central government
+{"source":0,"target":2,"value":3}, //financial and admin
+{"source":0,"target":3,"value":467}, // social services
+{"source":0,"target":4,"value":224}, // justice, crime prevention
+{"source":0,"target":5,"value":1326}, //economic services
+{"source":1,"target":6,"value":2}, //economic services
+{"source":1,"target":7,"value":1}, //economic services
+{"source":1,"target":8,"value":0}, //economic services
+{"source":2,"target":9,"value":1}, //economic services
+{"source":2,"target":10,"value":1}, //economic services
+{"source":3,"target":11,"value":1}, //economic services
+{"source":3,"target":12,"value":3}, //economic services
+{"source":3,"target":13,"value":32}, //economic services
+{"source":3,"target":14,"value":6}, //economic services
+{"source":3,"target":15,"value":1}, //economic services
+{"source":3,"target":16,"value":1}, //economic services
+{"source":3,"target":17,"value":1}, //economic services
+{"source":4,"target":18,"value":2}, //economic services
+{"source":4,"target":19,"value":8}, //economic services
+{"source":5,"target":20,"value":3}, //economic services
+{"source":5,"target":21,"value":2}, //economic services
+{"source":5,"target":22,"value":2}, //economic services
+{"source":5,"target":23,"value":1}, //economic services
+{"source":5,"target":24,"value":0}, //economic services
+{"source":5,"target":25,"value":2}, //economic services
+{"source":5,"target":26,"value":1}, //economic services
+{"source":5,"target":27,"value":12}, //economic services
+{"source":5,"target":28,"value":1}, //economic services
+{"source":5,"target":29,"value":1}, //economic services
+{"source":5,"target":30,"value":1}, //economic services
+{"source":5,"target":31,"value":2}, //economic services
+{"source":5,"target":32,"value":1}, //economic services
+{"source":5,"target":33,"value":1}, //economic services
+{"source":5,"target":34,"value":1}, //economic services
+]}
+*/
+var sta_dst_data2 ={"nodes":[
+{"name":"Central Government Administration"}, //0
+{"name":"Financial and Administration Services"}, //1
+{"name":"Social Services"},//2
+{"name":"Justice, Crime Prevention and Security"},//3
+{"name":"Economic Services and Infrastructure"},//4
+
+{"name":"Cooperative Governance"}, //5
+{"name":"Home Affairs"},//6
+{"name":"Public Works"}, //7
+{"name":"Public Enteprises"}, //8
+{"name":"Public Service Administration"},//9
+{"name":"Arts and Culture"},//10
+{"name":"Basic Education"},//11
+{"name":"Health"},//12
+{"name":"Higher Education"},//13
+{"name":"Labour"},//14
+{"name":"Social Development"},//15
+{"name":"Sport and Recreation"},//16
+{"name":"Defence and Millitary Veterans"},//17
+{"name":"Police"},//18
+{"name":"Agriculture, Forestry and Fisheries"},//19
+{"name":"Communications"},//20
+{"name":"Energy"},//21
+{"name":"Environmental Affairs"},//22
+{"name":"Human Settlements"},//23
+{"name":"Mineral Resources"},//24
+{"name":"Rural Development"},//25
+{"name":"Science and Technology"},//26
+{"name":"Trade and Industry"},//27
+{"name":"Statistics SA"},//28
+{"name":"Correctional Services"},//29
+{"name":"National Treasury"},//30
+{"name":"Tourism"},//31
+{"name":"Transport"},//32
+{"name":"Water Affairs"},//33
+
+ {"name" : "Defence"},//34
+ {"name" : "Police"},//35
+ {"name" : "Energy"},//36
+ {"name" : "Agriculture "},//37
+ {"name" : "Transport"},//38
+ {"name" : "Economic Framework"},//39
+ {"name" : "Commercial Services"},//40
+ {"name" : "Mineral Resources (Excluding Energy)"},//41
+ {"name" : "Manufacturing"},//42
+ {"name" : "Construction"},//43
+ {"name" : "Information and Communication services"},//44
+ {"name" : "Natural Resources"},//45
+ {"name" : "Health"},//46
+ {"name" : "Education and Training"},//47
+ {"name" : "Social Development and Community Services"},//48
+ {"name" : "Environmental Knowledge"},//49
+ {"name" : "Environmental aspects of Development"},//50
+ {"name" : "Environmental management and other Aspects"},//51
+ {"name" : "Natural Sciences, Technologies and Engineering"},//52
+ {"name" : "Social Sciences and Humanities"},//53
+
+ {"name": "coGTA"},//54
+],
+"links":[
+{"source":0,"target":5,"value":63212700}, //central government
+{"source":0,"target":6,"value":6623700}, //financial and admin
+{"source":0,"target":7,"value":6121300}, // social services
+
+{"source":1,"target":8,"value":259800}, // justice, crime prevention
+{"source":1,"target":9,"value":875100}, //economic services
+
+{"source":2,"target":10,"value":3524700}, //economic services
+{"source":2,"target":11,"value":19680100}, //economic services
+{"source":2,"target":12,"value":33955500}, //economic services
+{"source":2,"target":13,"value":50306700}, //economic services
+{"source":2,"target":14,"value":2527300}, //economic services
+{"source":2,"target":15,"value":128799400}, //economic services
+{"source":2,"target":16,"value":2970400}, //economic services
+
+{"source":3,"target":17,"value":42831200}, //economic services
+{"source":3,"target":18,"value":72507200}, //economic services
+
+{"source":4,"target":19,"value":6692400}, //economic services
+{"source":4,"target":20,"value":1593400}, //economic services
+{"source":4,"target":21,"value":7415600}, //economic services
+{"source":4,"target":22,"value":5668400}, //economic services
+{"source":4,"target":23,"value":30521400}, //economic services
+{"source":4,"target":24,"value":1471300}, //economic services
+{"source":4,"target":25,"value":9455300}, //economic services
+{"source":4,"target":26,"value":6470200}, //economic services
+{"source":4,"target":27,"value":9835000}, //economic services
+{"source":4,"target":28,"value":2242500}, //economic services
+{"source":4,"target":29,"value":19721100}, //economic services
+{"source":4,"target":30,"value":514823}, //economic services
+{"source":4,"target":31,"value":1662100}, //economic services
+{"source":4,"target":32,"value":48726500}, //economic services
+{"source":4,"target":33,"value":12480300}, //economic services
+
+//{"source":5,"target":34,"value":2}, //economic services
+{"source":6,"target":44,"value":343466}, //economic services
+//{"source":7,"target":36,"value":1}, //economic services
+{"source":8,"target":38,"value":57250}, //economic services
+{"source":9,"target":44,"value":3050}, //economic services
+{"source":10,"target":53,"value":35069}, //economic services
+{"source":11,"target":47,"value":1058681}, //economic services
+{"source":12,"target":46,"value":16225859}, //economic services
+{"source":13,"target":47,"value":3003557}, //economic services
+{"source":14,"target":39,"value":4345}, //economic services
+{"source":15,"target":48,"value":5097}, //economic services
+{"source":16,"target":48,"value":43982}, //economic services
+{"source":17,"target":34,"value":613959}, //economic services
+{"source":18,"target":35,"value":3625723}, //economic services
+{"source":19,"target":37,"value":1138325}, //economic services
+{"source":20,"target":48,"value":823798}, //economic services
+{"source":21,"target":36,"value":923363}, //economic services
+{"source":22,"target":51,"value":505425}, //economic services
+//{"source":23,"target":52,"value":1}, //economic services
+{"source":24,"target":41,"value":626295}, //economic services
+{"source":25,"target":50,"value":7786}, //economic services
+{"source":25,"target":52,"value":10930}, //economic services
+{"source":26,"target":36,"value":157461}, //economic services
+{"source":26,"target":37,"value":79703}, //economic services
+{"source":26,"target":40,"value":719268}, //economic services
+{"source":26,"target":42,"value":226796}, //economic services
+{"source":26,"target":44,"value":246236}, //economic services
+{"source":26,"target":46,"value":132190}, //economic services
+{"source":26,"target":47,"value":2002286}, //economic services
+{"source":26,"target":48,"value":77759}, //economic services
+{"source":26,"target":50,"value":77759}, //economic services
+{"source":26,"target":52,"value":2429959}, //economic services
+{"source":26,"target":53,"value":330474}, //economic services
+
+
+{"source":27,"target":39,"value":224725}, //economic services
+{"source":28,"target":44,"value":42479}, //economic services
+{"source":29,"target":44,"value":1815}, //economic services
+{"source":30,"target":39,"value":18391}, //economic services
+{"source":31,"target":51,"value":451}, //economic services
+{"source":32,"target":47,"value":17308}, //economic services
+{"source":33,"target":43,"value":200288}, //economic services
+{"source":33,"target":51,"value":18208}, //economic services
+{"source":33,"target":53,"value":9104}, //economic services
+{"source":54,"target":48,"value":596699}, //economic services
+]}
+
+
+
+createChart( sta_dst_data2 )
+</script>
+</body>
+</html>

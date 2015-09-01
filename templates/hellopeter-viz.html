@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Customer Service Mapping</title>
+    {% load staticfiles %}
+    {#<meta charset="utf-8">#}
+    <title>Data Filter</title>
+    <script type="text/javascript" src="{% static 'lib/d3.js' %}"></script> 
+    <script type="text/javascript" src="{% static 'local/hellopeter7.js' %}"></script>  
+    <script type="text/javascript" src="{% static 'external/crossfilter.v1.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/crossfilter.v1.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/d3.v3.min.js' %}"></script>	
+	<script type="text/javascript" src="{% static 'external/d3.v3.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/d3.v2.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/d3.v2.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/markerclusterer.js' %}"></script>
+
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/hellopeterv2.css' %}"/>
+   
+</head>
+<script>
+        var serviceComments = {{ service_reports | safe }};
+		document.addEventListener('DOMContentLoaded', init, false);
+</script>
+
+ <body>
+	 	<div id="topbar">
+	 		<div id="settings" class="settings">
+	      			<!--<button id="pointButton" class="settings-button" title="Points">Points</button>-->
+	      			<button id="basemapButton" class="settings-button" title="Basemap">Basemap</button>
+	      			<button id="basemapSelect" class="settings-drop-button" data-dropdown="#baseDropdown">▾</button>
+	      			<button id="heatButton" class="settings-button" title="Heatmap">Heatmap</button>
+	      			<button id="heatSelect" class="settings-drop-button" data-dropdown="#heatDropdown">▾</button>
+	    	</div>
+	 		   
+	    	<div id="promo"><a href="" target="_blank"><img src="{% static "images/customerservice.jpg" %}" class="logo-image"></a></div>
+  	<!-- search form for filtering results -->    
+		    <form id="search" class="search">	    	
+		    	<button id="advSearchButton" class="search-button search-input search" data-dropdown="#advSearchDropdown">▾</button>
+		    	<button id="submit" class="search-input" type="submit"><div id="submit-icon" class="sprites search"></div></button>
+		      	
+				<div id="industry" class="search">
+				  	 <input id="indstryInput" class="search-input" type="text" name="industries" placeholder="Industry"/>
+			     	 <span class="iconClear">X</span>
+				</div>
+				<div id="supplier" class="search">
+				  	 <input id="supplierInput" class="search-input" type="text" name="suppliers" placeholder="Supplier"/>
+			      	 <span class="iconClear">X</span>
+				</div>
+		      </form>
+	    
+	   </div>
+   	<!-- container for displaying the map -->
+	   <div id="main">
+	      <div id="hellopetermapview">
+	      		<!--<div id="map-canvas"></div> -->
+	        	<div id="hellomap"></div>  
+	      </div>
+	    </div>
+    <!-- container for displaying the service reports -->
+     	<div id="hellocontrol">
+     		    <div id="histogramnote" >Hover over each box to see report text. Green indicates a compliment while red indicates a 
+        			complaint!
+        			</div>
+        		<div id="reports" class="list"></div>
+        		<!-- <table id="supplierstable"></table> -->
+    	</div>
+    	
+ 	<!-- charts to be used as interactive filters -->	      
+	    <div id="charts">
+			  <div id="servicetime-chart" class="chart">
+			    <div class="title">Hour Filter</div>
+			  </div>
+			  
+			   <div id="servicedate-chart" class="chart">
+			    <div class="title">Date Filter</div>
+			  </div>  
+		</div>
+		
+		<div id="helloInfo">		
+        		<div id="hellonote">The interactive visualization includes more than 250,000 customer service reports extracted from the HelloPeter Website. The database 
+        			consists of geomapped customer complaints as well as compliments that captures over 5,000 service providers across South Africa from May 2013 to date.
+        		</div>
+    	</div>
+    	
+		<div id="bottomBar"></div>	
+		<!-- set menu for properties to appear on the map  -->
+		<div id="baseDropdown" class="dropdown dropdown-anchor-right">
+	        <ul id="baseMenu"class="dropdown-menu drop-menu">      
+	        </ul>
+	    </div>
+	       
+	    <div id="heatDropdown" class="dropdown dropdown-anchor-right">
+	      <ul id="heatMenu" class="dropdown-menu drop-menu">
+	        <li id="heatBlurOpt">
+	          <span style="float:left">Blur</span>
+	          <div id="blurSlider"></div>
+	          <div style="clear: both;"></div>
+	        </li>
+	        <li id="colorRamps"></li>
+	       
+	      </ul>
+	    </div>
+    
+ </body>
+</html>

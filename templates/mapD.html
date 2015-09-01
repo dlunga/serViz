@@ -1,0 +1,393 @@
+<!DOCTYPE HTML>
+<html>
+  <head profile="http://www.w3.org/2005/10/profile">
+    <link rel="icon" 
+          type="image/png" 
+          href="img/favicon32.png">
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Map-D Tweetmap</title>
+    <link rel="stylesheet" href="css/map.css" />
+    <link rel="stylesheet" href="css/chart.css" />
+    <link rel="stylesheet" href="css/choropleth.css" />
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/redmond/jquery-ui.css" />
+    <!--<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/dark-hive/jquery-ui.css" />-->
+    <!--<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.1/themes/smoothness/jquery-ui.min.css" />-->
+    <link rel="stylesheet" href="lib/js/jQCloud/jqcloud/jqcloud.css" />
+    <link rel="stylesheet" href="lib/js/jquery-minicolors/jquery.minicolors.css" />
+    <link type="text/css" rel="stylesheet" href="lib/css/jquery.dropdown.css" />
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+    <script src="http://maps.google.com/maps/api/js?sensor=false"></script>
+    <!--<script src="http://openlayers.org/api/OpenLayers.js"></script>-->
+    <script src="lib/js/OpenLayers/lib/OpenLayers.js">
+    <script src="lib/js/javascript.util.js"></script>
+    <script src="lib/js/twitter-text.js"></script>
+    <script src="lib/js/d3.v3.min.js"></script>
+    <script src="lib/js/jquery.json-2.4.min.js"></script>
+    <!--<script src="http://d3js.org/d3.v3.min.js"></script>-->
+    <script src="http://d3js.org/topojson.v1.min.js"></script>
+
+
+    <script src="lib/js/jsts.js"></script>
+    <script type="text/javascript" src="lib/js/jQCloud/jqcloud/jqcloud-1.0.4.min.js"></script>
+    <script type="text/javascript" src="lib/js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="lib/js/jquery.dropdown.js"></script>
+    <script src="js/host.js"></script>
+    <script src="js/info.js"></script>
+    <script src="js/olext.js"></script>
+    <script src="js/node.js"></script>
+    <script src="js/chart.js"></script>
+    <script src="js/barchart.js"></script>
+    <script src="js/scatterplot.js"></script>
+    <script src="js/mapd.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/realtime.js"></script>
+    <script src="js/choropleth.js"></script>
+    <script type="text/javascript" src="lib/js/jquery-minicolors/jquery.minicolors.min.js"></script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-45485915-2', 'map-d.com');
+                ga('send', 'pageview');
+
+    </script>
+</head>
+
+  <body>
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=230516837113085";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));</script>
+
+
+   <!--script>(function(d, s, id) {
+     var js, fjs = d.getElementsByTagName(s)[0];
+     if (d.getElementById(id)) return;
+     js = d.createElement(s); js.id = id;
+     js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+     fjs.parentNode.insertBefore(js, fjs);
+     }(document, 'script', 'facebook-jssdk'));</script>-->
+
+    <div id="topbar">
+      <!--<div id="promo"><a href="http://www.map-d.com" target="_blank"><img src="img/tweetmap_logo.png" class="logo-image"></a></div>-->
+      <form id="search" class="search">
+	<div id="terms" class="search">
+	  <input id="termsInput" class="search-input" type="text" name="terms" placeholder=" What"/>
+      <span class="iconClear">X</span>
+	</div>
+	<div id="user" class="search">
+	  <input id="userInput" class="search-input" type="text" name="user" placeholder=" Who"/>
+      <span class="iconClear">X</span>
+	</div>
+	<div id="location" class="search">
+	  <input id="zoomInput" class="search-input" type="text" name="zoom" placeholder=" Where"/>
+      <span class="iconClear">X</span>
+	</div>
+	<button id="submit" class="search-input" type="submit">
+	  <div id="submit-icon" class="sprites search"></div>
+	</button>
+      <button id="advSearchButton" class="search-button search-input search" data-dropdown="#advSearchDropdown">▾</button>
+
+      </form>
+
+    <div id="promo"><a href="http://www.map-d.com" target="_blank"><img src="img/tweetmap-logo-white-34.png" class="logo-image"></a></div>
+    <div id="settings" class="settings">
+      <!--
+      <div  id="datasetRadio" class="dataset-buttons">
+        <input type="radio" id="historicRadio" name="datasetRadio"><label for="historicRadio">Historical</label>
+        <input type="radio" id="streamingRadio" name="datasetRadio"><label for="streamingRadio">Streaming</label>
+      </div>
+      -->
+
+      <!--<button id="pointButton" class="settings-button" title="Points">Points</button>-->
+      <button id="basemapButton" class="settings-button" title="Basemap">Basemap</button>
+      <button id="basemapSelect" class="settings-drop-button" data-dropdown="#baseDropdown">▾</button>
+      <button id="pointButton" class="settings-button" title="Pointmap">Pointmap</button>
+      <button id="pointSelect" class="settings-drop-button" data-dropdown="#pointDropdown">▾</button>
+        <!--<div id="pointButtonImg"></div>-->
+      <button id="heatButton" class="settings-button" title="Heatmap">Heatmap</button>
+      <button id="heatSelect" class="settings-drop-button" data-dropdown="#heatDropdown">▾</button>
+      <button id="polyButton" class="settings-button" title="Choropleth">Choropleth</button>
+      <button id="polySelect" class="settings-drop-button" data-dropdown="#polyDropdown">▾</button>
+    </div>
+    
+    <!--<div id="animControls">
+      <button id="play-pause" class="anim-input play-icon" type="button" title="Play/Pause"></button>
+      <button id="stop" class="anim-input stop-icon" type="button" title="Stop"></button>
+    </div>-->
+    <!--<div id="social">
+     <div id="social-share" data-dropdown="#share-dropdown" title="Share a link to the current view with your current settings applied"> 
+        <div id="share">Share this map ▾</div>
+     </div>
+       <div class="fb-like" data-href="https://www.facebook.com/datarefined" data-width="120" data-height="30" data-colorscheme="dark" data-layout="button_count" data-action="like" data-show-faces="true" data-share="false" style="padding-bottom:5px"></div>
+      <a href="https://twitter.com/datarefined" id="twitter-follow" class="twitter-follow-button" data-show-count="false">Follow @datarefined</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+   </div>-->
+
+
+
+   </div>
+      <!--
+      <a href="https://twitter.com/share" class="twitter-share-button" data-via="datarefined" data-related="datarefined" data-hashtags="MapD" data-dnt="true">Tweet this map</a>
+      <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+      <button id="link-button">Link this view</button>-->
+      <!--<button id="facebook" class="social-button" type="button" title="Facebook">-->
+      <!--<div id="facebook-icon"></div>-->
+
+      <!--<a href="https://twitter.com/datarefined" target="_blank"><img id="twitter-icon" src="img/twitter-logo.png"></a>
+      <a href="https://facebook.com/datarefined" target="_blank"><img id="facebook-icon" src="img/facebook-logo.png"></a>-->
+      <!--<button id="twitter" class="social-button" type="button" title="Twitter">
+      <div id="twitter-icon"></div>-->
+
+    <div id="main">
+      <div id="mapview">
+        <div id="map"></div>
+        <div id="mapAnimControls">
+          <button class="play-pause anim-input play-icon" type="button" title="Play/Pause"></button>
+          <button class="stop anim-input stop-icon" type="button" title="Stop"></button>
+        </div>
+
+        <div id="sizeButton"></div>
+        <button id="curLoc"></button>
+        </div>
+      <div  id="datasetRadio" class="dataset-buttons">
+        <input type="radio" value="historic" id="historicRadio" name="datasetRadio"><label for="historicRadio">Historical</label>
+        <input type="radio" value="streaming" id="streamingRadio" name="datasetRadio"><label for="streamingRadio">Streaming</label>
+      </div>
+        
+   </div>
+      <div id="control">
+      <!--
+      <div id="advSearch">
+        <div id="advSearchBar">Advanced Search ▾</div>
+      </div>
+
+      <div id="advSearchInput">
+          <div id="location">
+            <button id="locationSelect" class="search-drop-button" data-dropdown="#locDropdown">Country ▾</button>
+            <input id="locationInput" type="text" name="location"/>
+            <span class="iconClear">X</span>
+          </div>
+        </div>
+      </div>
+      <div style="clear: both;"></div>
+      -->
+        <div id="sortOrder"></div>
+        <div id="tweets"></div> 
+            <div id="cloudBox">
+
+
+                        <!--<span id="displayMode">
+
+                            <input type="radio" id="cloudDisplay" value="cloud" name="displayMode" /><label for="cloudDisplay">Cloud</label>
+                            <input type="radio" id="barDisplay" value="chart" name="displayMode"  /><label for="barDisplay">Graph</label>
+                        </span>
+                        <span id="dataSource">
+                          <input type="radio" id="dataWords" value="words" name="dataSource" /><label for="dataWords">Words</label>
+                          <input type="radio" id="dataUsers" value="users" name="dataSource"  /><label for="dataUsers">Users</label>
+                          <input type="radio" id="dataGeo" value="geo" name="dataSource"  /><label for="dataGeo">Geo</label>
+                          <input type="radio" id="dataOrigin" value="origin" name="dataSource"  /><label for="dataOrigin">Origin</label>
+                        </span>
+                        <span id="dataNums">
+                          <input type="radio" id="dataCounts" value="counts" name="dataNums" /><label for="dataCounts">#</label>
+                          <input type="radio" id="dataPercents" value="percents" name="dataNums"  /><label for="dataPercents">%</label>
+                        </span>
+                        <button id="lock">unlocked</button>
+                      </div>-->
+                <div id="cloud"></div>
+                <div id="numTokensText"></div>
+            </div>
+      </div>
+      <div id="chart"></div>
+    </div>
+    <div id="bottomBar">
+      <div id="analysisControls">
+
+        <!--div class="data-menu" data-vertical-offset="-145" id="dataDisplay" data-dropdown="#dataDisplayDropdown" title="Visualization type"><span class="category-text">Chart:</span><span class="choice-text"></span><span class="drop-triangle">▾</span></div>-->
+                  <div class="data-buttons" id="DisplayButtons">
+                    <input type="radio" id="CloudDisplay" value="cloud" name="displayMode" /><label for="CloudDisplay"><img src="img/cloud-black.png" class="display-image"></label>
+                      <input type="radio" id="BarDisplay" value="chart" name="displayMode"  /><label for="BarDisplay"><img src="img/barchart-black.png" class="display-image"></label>
+                      <input type="radio" id="ScatterDisplay" value="scatter" name="displayMode"  /><label for="ScatterDisplay"><img src="img/scatterplot-black.png" class="display-image"></label>
+                  </div>
+                  <div class="data-buttons" id="ModeButtons">
+                    <input type="radio" id="CountsMode" value="counts" name="dataNums" /><label for="CountsMode">#</label>
+                    <input type="radio" id="PercentsMode" value="percents" name="dataNums"  /><label for="PercentsMode">%</label>
+                  </div>
+                  <div id="aggVar">
+                    <span>Aggregate by:</span>
+                    <div class="data-menu" data-vertical-offset="-290"  id="dataSource" data-dropdown="#dataSourceDropdown" title="Variable to group by"><span class="category-text"></span><span class="choice-text"></span><span class="drop-triangle">▲</span></div>
+                  </div>
+
+
+
+                <!--<div class="data-menu" data-vertical-offset="-255"  id="dataMode" data-dropdown="#dataModeDropdown" title="How variable is sorted"><span class="category-text">Scale:</span><span class="choice-text"></span><span class="drop-triangle">▾</span></div>-->
+              <button id="lock">unlocked</button>
+        </div>
+      <div id="timeControls"></div>
+      <div id="bottomSocial">
+       <div id="social-share" data-vertical-offset="-160" data-dropdown="#share-dropdown" title="Share a link to the current view with your current settings applied"> 
+          <div id="share">Share this map ▲</div>
+       </div>
+       <div class="fb-like" data-href="https://www.facebook.com/datarefined" data-width="120" data-height="30" data-colorscheme="dark" data-layout="button_count" data-action="like" data-show-faces="true" data-share="false" style="padding-bottom:5px"></div>
+      <a href="https://twitter.com/datarefined" id="twitter-follow" class="twitter-follow-button" data-show-count="false">Follow @datarefined</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+      </div>
+
+
+   </div>
+  </div>
+    <div id="link-dialog" title="Link to this map view"> </div>
+    <div id="infoDiv" title="About this App"> </div>
+
+    <div id="advSearchDropdown" class="dropdown dropdown-anchor-right">
+        <ul id="searchMenu"class="dropdown-menu drop-menu">
+          <li>
+          <div id="lang">
+            <span style="margin-left: 5px; margin-right: 11px;" >Language</span>
+            <input id="langInput" class="adv-search-input"  type="text" name="language"/>
+            <span class="iconClear">X</span>
+            </div>
+          <div id="originSearch">
+            <span style="margin-left: 5px; margin-right: 23px;" >OS/App</span>
+            <input id="originInput" class="adv-search-input" type="text" name="origin"/>
+            <span class="iconClear">X</span>
+          </div>
+          <div id="loc">
+
+            <select id="locationSelect">
+              <option value="Country">Country</value>
+              <option value="State">State</value>
+              <option value="County">County</value>
+            </select>
+        
+            <input id="locationInput" class="adv-search-input"  type="text" name="location"/>
+            <span class="iconClear">X</span>
+            </div>
+          </li>
+        </ul>
+    </div>
+
+
+    <div id="baseDropdown" class="dropdown dropdown-anchor-right">
+        <ul id="baseMenu"class="dropdown-menu drop-menu">
+            <!--
+            <li id ="darkMap">Dark</li>
+            <li id ="googleRoadmap">Google Roadmap</li>
+            -->
+        </ul>
+    </div>
+
+    <div id="pointDropdown" class="dropdown dropdown-anchor-right">
+      <ul id="pointMenu" class="dropdown-menu drop-menu">
+        <li id="pointSizeOpt">
+          <span style="float:left">Size</span>
+          <div class="pointSize" id="pointSizes" style="float:left; margin-left:10px";>
+            <div id="autoPointSize" class="point-size">Auto</div>
+            <div class="point-size circle" style="margin-top: 6px; width:4px; height:4px;"></div>
+            <div class="point-size circle" style="margin-top: 6px; width:4px; height:4px;"></div>
+            <div class="point-size circle" style="margin-top: 6px; width:5px; height:5px;"></div>
+            <div class="point-size circle" style="margin-top: 6px; width:6px; height:6px;"></div>
+            <div class="point-size circle" style="margin-top: 6px; width:7px; height:7px;"></div>
+            <div class="point-size circle" style="margin-top: 6px; width:8px; height:8px;"></div>
+            <!--<div class="pointSize circle" style="margin-top: 6px; width:9px; height:9px;"></div>-->
+          </div>
+          <div style="clear: both;"></div>
+        </li>
+        <li id="pointColorByOpt">
+            <span style="float:left">Color by</span>
+            <div id='pointColorNone' class="color-by-cat">None</div>
+            <div id='pointColorUser' class="color-by-cat">User</div>
+            <div id='pointColorOS'class="color-by-cat">OS/App</div>
+            <div id='pointColorLang'class="color-by-cat">Language</div>
+            <div style="clear: both;"></div>
+        </li>
+        <li id="pointStaticColor">
+            <span style="float:left; margin-right:10px;">Color</span>
+            <input type="hidden" name="pointColor" id="pointColorPicker" class="color-picker" data-inline="true" size="2" autocomplete="on" value="#00F" />
+              <div style="clear: both;"></div>
+        </li>
+      </ul>
+    </div>
+
+    <div id="locDropdown" class="dropdown dropdown-anchor-left">
+      <ul id="locMenu" class="dropdown-menu drop-menu">
+       <li id="locCountry"><span>Country</span></li>
+       <li id="locState"><span>State</span></li>
+       <li id="locCounty"><span>County</span></li>
+      </ul>
+    </div>
+
+    <div id="heatDropdown" class="dropdown dropdown-anchor-right">
+      <ul id="heatMenu" class="dropdown-menu drop-menu">
+        <li id="heatBlurOpt">
+          <span style="float:left">Blur</span>
+          <div id="blurSlider"></div>
+          <div style="clear: both;"></div>
+        </li>
+        <li id="colorRamps"></li>
+        <!--
+        <li id="heatLevelOpt">
+          <span style="float:left">Level</span>
+          <div id="levelSlider"></div>
+          <div style="clear: both;"></div>
+        </li>-->
+      </ul>
+    </div>
+    <div id="polyDropdown" class="dropdown dropdown-anchor-right">
+      <ul id="polyMenu" class="dropdown-menu drop-menu">
+         <li id="polyCountry"><span>Country</span><span class="checkmark">&#x2713</span></li>
+         <li id="polyState"><span>State</span><span class="checkmark">&#x2713</span></li>
+         <li id="polyCounty"><span>County</span><span class="checkmark">&#x2713</span></li>
+          <li id="polyMinOpt">
+          <span style="float:left">Min Tweets</span>
+          <div style=" margin-left: 70px;" id="polyMinSlider"></div>
+          <div style="clear: both;"></div>
+        </li>
+      </ul>
+    </div>
+
+    <div id="share-dropdown" class="dropdown dropdown-anchor-right has-icons">
+        <ul id="shareMenu" class="dropdown-menu drop-menu">
+            <li id="twitter-share"><span>On Twitter</span></li>
+            <li id="facebook-share"><span>On Facebook</span></li>
+            <li id="clipboard-share"><span>Permalink</span></li>
+        </ul>
+    </div>
+    <div id="dataDisplayDropdown" class="dropdown dropdown-anchor-left ">
+        <ul id="dataDisplayMenu" class="dropdown-menu drop-menu data-dropdown display-menu">
+            <li id="dataDisplayCloud"><span>Cloud</span><span class="checkmark">&#x2713</span></li>
+            <li id="dataDisplayBarchart"><span>Bar</span><span class="checkmark">&#x2713</span></li>
+            <li id="dataDisplayScatter"><span>Scatter</span><span class="checkmark">&#x2713</span></li>
+        </ul>
+    </div>
+
+    <div id="dataSourceDropdown" class="dropdown dropdown-anchor-left ">
+        <ul id="dataSourceMenu" class="dropdown-menu drop-menu data-dropdown source-menu">
+            <li id="dataSourceWord"><span>Word</span><span class="checkmark">&#x2713</span></li>
+            <li id="dataSourceUser"><span>User</span><span class="checkmark">&#x2713</span></li>
+            <li id="dataSourceOS-App"><span>Language</span><span class="checkmark">&#x2713</span></li>
+            <li id="dataSourceOS-App"><span>OS-App</span><span class="checkmark">&#x2713</span></li>
+            <li id="dataSourceCountry"><span>Country</span><span class="checkmark">&#x2713</span></li>
+            <li id="dataSourceState"><span>State</span><span class="checkmark">&#x2713</span></li>
+            <li id="dataSourceCounty"><span>County</span><span class="checkmark">&#x2713</span></li>
+            <!--<li id="dataSourceZip"><span>Zip</span><span class="checkmark">&#x2713</span></li>-->
+        </ul>
+    </div>
+    
+    <div id="dataModeDropdown" class="dropdown dropdown-anchor-left ">
+        <ul id="dataModeMenu" class="dropdown-menu drop-menu data-dropdown mode-menu">
+            <li id="dataModeCounts"><span>Counts</span><span class="checkmark">&#x2713</span></li>
+            <li id="dataModePercents"><span>Percents</span><span class="checkmark">&#x2713</span></li>
+            <!--<li id="dataModeTrends"><span>Trends</span><span class="checkmark">&#x2713</span></li>-->
+        </ul>
+    </div>
+  </body>
+</html>

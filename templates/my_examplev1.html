@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Customer Service Mapping</title>
+    {% load staticfiles %}
+    {#<meta charset="utf-8">#}
+    <title>Data Filter</title>
+    <!--<link rel="stylesheet" type="text/css" href="{% static 'css/localstyles.css' %}"/> -->
+    <script type="text/javascript" src="{% static 'lib/d3.js' %}"></script> 
+    <script type="text/javascript" src="{% static 'local/localcrossfilterv3.js' %}"></script>
+    <script type="text/javascript" src="{% static 'external/crossfilter.v1.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/crossfilter.v1.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/d3.v3.min.js' %}"></script>	
+	<script type="text/javascript" src="{% static 'external/d3.v3.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/d3.v2.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/d3.v2.min.js' %}"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&region=ES"></script>
+    <!--<link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}"/>	-->
+</head>
+<style>
+@import url(http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:400,700);
+/* body {
+  font-family: "Helvetica Neue";
+  margin: 40px auto;
+  width: 960px;
+  min-height: 2000px;
+  position: relative;
+} */
+
+body {
+font-size: 10pt;
+font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+color: black;
+line-height: 14pt;
+padding-left: 5pt;
+padding-right: 5pt;
+padding-top: 5pt;
+}
+.bar {
+  		fill: steelblue;
+	  }
+.chart1 {
+  		top: 40%;
+	  }
+
+#map-canvas {
+ 		width: 680px;
+  		height: 605px;
+        padding: 3pt;
+        float: right;
+        background-color: #E0E0E0;
+        border: 1px solid black;
+      }
+
+
+#body {
+  position: relative;
+}
+
+footer {
+  padding: 2em 0 1em 0;
+  font-size: 12px;
+}
+
+h1 {
+  font-size: 96px;
+  margin-top: .3em;
+  margin-bottom: 0;
+}
+
+h1 + h2 {
+  margin-top: 0;
+}
+
+h2 {
+  font-weight: 400;
+  font-size: 28px;
+}
+
+h1, h2 {
+  font-family: "Yanone Kaffeesatz";
+  text-rendering: optimizeLegibility;
+}
+
+#body > p {
+  line-height: 1.5em;
+  width: 640px;
+  text-rendering: optimizeLegibility;
+}
+
+#charts {
+  padding: 10px 0;
+  float: center;
+}
+
+.chart {
+  display: inline-block;
+  height: 151px;
+  margin-bottom: 20px;
+}
+
+.reset {
+  padding-left: 1em;
+  font-size: smaller;
+  color: #ccc;
+}
+
+.background.bar {
+  fill: #ccc;
+}
+
+.foreground.bar {
+  fill: steelblue;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.axis text {
+  font: 10px sans-serif;
+}
+
+.brush rect.extent {
+  fill: steelblue;
+  fill-opacity: .125;
+}
+
+.brush .resize path {
+  fill: #eee;
+  stroke: #666;
+}
+
+#hour-chart {
+  width: 260px;
+}
+
+#delay-chart {
+  width: 230px;
+}
+
+#distance-chart {
+  width: 420px;
+}
+
+#date-chart {
+  width: 920px;
+}
+
+#servicetime-chart {
+  width: 260px;
+}
+
+#servicedate-chart {
+  width: 920px;
+}
+
+#flight-list {
+  min-height: 1024px;
+}
+
+
+#flight-list .date,
+#flight-list .day {
+  margin-bottom: .4em;
+}
+
+#flight-list .flight {
+  line-height: 1.5em;
+  background: #eee;
+  width: 640px;
+  margin-bottom: 1px;
+}
+
+#flight-list .time {
+  color: #999;
+}
+
+#flight-list .flight div {
+  display: inline-block;
+  width: 100px;
+}
+
+#flight-list div.distance,
+#flight-list div.delay {
+  width: 160px;
+  padding-right: 10px;
+  text-align: right;
+}
+
+#flight-list .early {
+  color: green;
+}
+
+#service-list {
+  min-height: 1024px;
+}
+
+#service-list .date,
+#service-list .day {
+  margin-bottom: .4em;
+}
+
+#service-list .service {
+  line-height: 1.5em;
+  background: #eee;
+  width: 820px;
+  margin-bottom: 1px;
+}
+
+#service-list .time {
+  color: #999;
+}
+
+#service-list .service div {
+  display: inline-block;
+  width: 100px;
+}
+
+aside {
+  position: absolute;
+  left: 740px;
+  font-size: smaller;
+  width: 220px;
+}
+
+</style>
+<!--
+ <div class="iframe-rwd">
+  <iframe width="425" height="350" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"src="https://maps.google.com/maps?f=q&amp;source=s_q&amp;hl=en&amp;geocode=&amp;q=Seattle,+WA&amp;aq=0&amp;oq=seattle&amp;sll=37.822293,-85.76824&amp;sspn=6.628688,16.907959&amp;t=h&amp;ie=UTF8&amp;hq=&amp;hnear=Seattle,+King,+Washington&amp;z=11&amp;ll=47.60621,-122.332071&amp;output=embed"></iframe><br /><small><a href="https://maps.google.com/maps?f=q&amp;source=embed&amp;hl=en&amp;geocode=&amp;q=Seattle,+WA&amp;aq=0&amp;oq=seattle&amp;sll=37.822293,-85.76824&amp;sspn=6.628688,16.907959&amp;t=h&amp;ie=UTF8&amp;hq=&amp;hnear=Seattle,+King,+Washington&amp;z=11&amp;ll=47.60621,-122.332071" style="color:#0000FF;text-align:left">View Larger Map</a></small>
+ </div>
+  -->
+<div id="chart"></div>
+<svg class="chart1"></svg>
+
+<script>
+var geocoder;
+var map;
+var query = 'Pretoria';
+
+// data comes in as a list of lists
+var datalists = {{ supplier_list | safe }};
+var data = datalists ;
+var mydata = {{ latest_marks | safe }};
+var flightsdata = {{ flightdicts | safe }};
+var service_comments = {{ service_reports | safe }};
+    
+var margin = {top: 20, right: 30, bottom: 30, left: 40},
+    width = 500 - margin.left - margin.right,
+    height = 300 - margin.top - margin.bottom;
+       
+var x = d3.scale.ordinal()
+    .rangeRoundBands([0, width], .1);
+    
+var y = d3.scale.linear()
+    .range([height, 0]);
+    
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");   
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left");
+var chart = d3.select(".chart1")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+function vbar(data) {
+  x.domain(data.map(function(d) { return d["supplier_name"]; }));
+  y.domain([0, d3.max(data, function(d) { return d["count"]; })]);
+
+ chart.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis)
+      	.append("text");
+      	//.attr("transform", "rotate(90)");
+      
+//chart.append("g")
+//      .attr("class", "y axis")
+//      .call(yAxis);
+      
+chart.append("g")
+    .attr("class", "y axis")
+    .call(yAxis)
+  .append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", 6)
+    .attr("dy", ".71em")
+    .style("text-anchor", "end")
+    .text("Frequency");
+      
+chart.selectAll(".bar")
+      .data(data)
+    .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", function(d) { return x(d["supplier_name"]); })
+      .attr("y", function(d) { return y(d["count"]); })
+      .attr("height", function(d) { return height - y(d["count"]); })
+      .attr("width", x.rangeBand());
+      
+
+  };          
+
+  //var bar = chart.selectAll("g")
+  //    .data(data)
+  //  .enter().append("g")
+  //    .attr("transform", function(d, i) { return "translate(" + x(d["supplier_name"]) + ",0)"; });
+
+  //bar.append("rect")
+  //    .attr("y", function(d) { return y(d["count"]); })
+  //    .attr("height", function(d) { return height - y(d["count"]); })
+  //    .attr("width", x.rangeBand());
+
+ // bar.append("text")
+ //     .attr("x", x.rangeBand() / 2)
+ //     .attr("y", function(d) { return y(d["count"]) + 3; })
+ //     .attr("dy", ".75em")
+ //     .text(function(d) { return d["count"]; });
+//};
+
+
+//function render(data) {
+//        d3.select("#chart").selectAll("div.h-bar") // <-B
+//                .data(data)
+//            .enter().append("div")
+//            .attr("class", "h-bar")
+//            .append("span");
+//
+//        d3.select("#chart").selectAll("div.h-bar") // <-C
+//                .data(data)
+//            .exit().remove();
+//
+//        d3.select("#chart").selectAll("div.h-bar") // <-D
+//                .data(data)
+//            .attr("class", "h-bar")
+//            .style("width", function (d) {
+//            	//console.log(d);
+//                return (d["count"] * 5) + "px";
+//                //return (d[1] * 5) + "px";
+//            })
+//            .select("span")
+//                .text(function (d) {
+//                    return d["supplier_name"];
+//                    //return d[0];
+//                });
+//    }
+
+//render(data);
+function load(){ // <-E
+        data = data.concat(datalists);  
+        vbar(data);
+}
+
+function loadMarkers() {
+	for (var i in mydata) {
+        var point = new google.maps.LatLng(mydata[i]["lat"],mydata[i]["lon"]);
+        var marker = new google.maps.Marker({
+                position: point,
+                map: map
+            });     
+    }
+}
+	
+
+function initialize() {
+  var latLng = new google.maps.LatLng(-25.74, 28.187);
+  geocoder = new google.maps.Geocoder();
+  var mapOptions = {
+    zoom:8,
+    center: latLng,
+    mapTypeId: google.maps.MapTypeId.ROADMAP
+  };
+  map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+  vbar(datalists);
+  loadMarkers();
+  computeservice(service_comments,flightsdata);
+}
+google.maps.event.addDomListener(window, 'load', initialize);
+</script>
+
+<div id="map-canvas"></div>	
+
+ <div id="body">
+  	<!--<form>
+  		<label><input type="radio" name="mode" value="supplier"> By Supplier</label>
+  		<label><input type="radio" name="mode" value="industry" checked> By Industry</label>
+	</form> -->
+       
+    <div id="charts">
+	  <div id="hour-chart" class="chart">
+	    <div class="title">Time of Day</div>
+	  </div>
+	  <div id="delay-chart" class="chart">
+	    <div class="title">Arrival Delay (min.)</div>
+	  </div>
+	  <div id="distance-chart" class="chart">
+	    <div class="title">Distance (mi.)</div>
+	  </div>
+	  <div id="date-chart" class="chart">
+	    <div class="title">Date</div>
+	  </div>
+	  
+	   <div id="servicedate-chart" class="chart">
+	    <div class="title">ConsumerDate</div>
+	  </div>
+	  
+	   <div id="servicetime-chart" class="chart">
+	    <div class="title">ServiceTime</div>
+	  </div>
+	   
+	</div>
+
+	<aside id="totals"><span id="active">-</span> of <span id="total">-</span> flights selected.</aside>
+
+	<div id="lists">
+	  <!-- <div id="flight-list" class="list"></div> -->
+	  <div id="service-list" class="list"></div>
+	</div>
+	
+	
+ <!--    
+    <footer>
+      <span style="float:right;">
+          Released under the <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache License 2.0</a>.
+      </span>
+       Copyright 2012 <a href="http://squareup.com">Square, Inc.</a>
+    </footer>
+
+   <a href="https://github.com/square/crossfilter"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
+   -->
+    <div class="control-group">
+    	<button onclick="load()">Load Data from Django</button>
+	</div>
+ </div>
+</html>

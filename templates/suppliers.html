@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load staticfiles %}
+    {#<meta charset="utf-8">#}
+    <title>Data Filter</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}"/>
+    <script type="text/javascript" src="{% static 'lib/d3.js' %}"></script>
+    <script type="text/javascript" src="http://ecn.dev.virtualearth.net/MapControl/mapcontrol.ashx?v=6.3c"></script>   	
+</head>
+
+
+<script type="text/javascript">
+    //var BingKey = 'AnaG2mEw9MtCDlqmp1H8wYo67UKQeNbLnTCZ8f4cqAWmzjWS3Bgqf320-A0-NAgB'
+    var map = null;
+    function GetMap() {
+        map = new VEMap('myMap');            
+        map.LoadMap();
+    }
+</script>
+
+<body onload="GetMap();">
+    <div style="width:630px; background-color: #E0E0E0; height: 500px; border: 1px solid black">
+        <h1 align="center">Bing Maps</h1>
+        <div id='myMap' style="position:relative; width:600px; height:400px; margin-left:15px"></div>
+    </div>
+<div id="chart"></div>	
+<script type="text/javascript">
+   
+    // data come in as a dictionary object
+    var datadict = {{ supplier_dict | safe }};
+    var dict = []; 
+    
+    // data comes in as a list of lists
+    var datalists = {{ supplier_list | safe }};
+    
+    console.log(datadict);
+    //create a dictionary
+    for(var key in datadict) {
+    	dict.push ({count: datadict[key], supplier_name:key});
+	}
+    
+    var data = [ // <-A
+        {count: 10, supplier_name: "Vodacom"},
+        {count: 15, supplier_name: "Mtn"},
+        {count: 30, supplier_name: "First National Bank"},
+        {count: 50, supplier_name: "Cell C"},
+        {count: 80, supplier_name: "Standard Bank"},
+        {count: 65, supplier_name: "Telkom"},
+        {count: 55, supplier_name: "MiWay"},
+        {count: 30, supplier_name: "Absa"},
+        {count: 20, supplier_name: "None"},
+        {count: 10, supplier_name: "8ta Telkom Mobile"},
+        {count: 8, supplier_name: "Outsurance"}
+    ];
+
+    function render(data) {
+        d3.select("#chart").selectAll("div.h-bar") // <-B
+                .data(data)
+            .enter().append("div")
+            .attr("class", "h-bar")
+            .append("span");
+
+        d3.select("#chart").selectAll("div.h-bar") // <-C
+                .data(data)
+            .exit().remove();
+
+        d3.select("#chart").selectAll("div.h-bar") // <-D
+                .data(data)
+            .attr("class", "h-bar")
+            .style("width", function (d) {
+            	console.log(d);
+                return (d["count"] * 5) + "px";
+                //return (d[1] * 5) + "px";
+            })
+            .select("span")
+                .text(function (d) {
+                    return d["supplier_name"];
+                    //return d[0];
+                });
+    }
+
+    render(data);
+    
+    //var indata = document.getElementById("myVar").value;
+
+
+    function load(){ // <-E
+        data = data.concat(datalists);  
+        render(data);
+    }
+</script>
+
+
+<div class="control-group">
+    <button onclick="load()">Load Data from Django</button>
+</div>
+
+</body>
+
+</html>

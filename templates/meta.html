@@ -1,0 +1,18 @@
+<html>
+<head><title>Ordering notice</title></head>
+
+<body>
+
+<h1>Meta Requests Dictionary Details</h1>
+
+<p>Here is the information contained in the header:</p>
+
+<table>
+{% for key, value in meta_list %}
+	<tr><td>{{key}}</td><td>{{value}}</td></tr>   
+{% endfor %}
+</table>
+
+
+</body>
+</html>

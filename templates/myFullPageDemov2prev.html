@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>Customer SerViz</title>
+	{% load staticfiles %}
+
+	<meta name="Resource-type" content="Document" />
+	<!--Bootsrap links -->
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+  	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+ 	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+	
+	<link rel="stylesheet" type="text/css" href="{% static 'external/css3/jquery.fullPage.css' %}"/>
+	<link rel="stylesheet" type="text/css" href="{% static 'external/css3/examples.css' %}"/>
+	<link rel="stylesheet" type="text/css" href="{% static 'css/hellopeterfullpage.css' %}"/>
+	<!-- <link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}"/> -->
+	
+	<script type="text/javascript" src="{% static 'external/wordfreq.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/wordfreq.worker.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/wordcloud2.js-master/src/wordcloud2.js' %}"></script>
+	<script type="text/javascript" src="https://www.google.com/jsapi"></script> 
+    <script type="text/javascript" src="{% static 'lib/d3.js' %}"></script> 
+    <script type="text/javascript" src="{% static 'local/hellopeterfullpage.js' %}"></script>  
+    <script type="text/javascript" src="{% static 'external/crossfilter.v1.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/crossfilter.v1.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/d3.v3.min.js' %}"></script>	
+	<script type="text/javascript" src="{% static 'external/d3.v3.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/d3.v2.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/d3.v2.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/markerclusterer.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/d3.layout.cloud.js' %}"></script>
+
+	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+	
+	<style>
+
+	/* Style for our header texts
+	* --------------------------------------- */
+	h1{
+		font-size: 5em;
+		font-family: arial,helvetica;
+		color: #fff;
+		margin:0;
+		padding:0;
+	}
+	.intro p{
+		color: #fff;
+	}
+
+	/* Centered texts in each section
+	* --------------------------------------- */
+	.section{
+		text-align:center;
+	}
+
+	/* Fixed header and footer.
+	* --------------------------------------- */
+	#header, #footer{
+		position:fixed;
+		height: 50px;
+		display:block;
+		width: 100%;
+		background: #333;
+		z-index:9;
+		text-align:center;
+		color: #f2f2f2;
+		padding: 20px 0 0 0;
+	}
+
+	#header{
+		top:0px;
+	}
+	#footer{
+		bottom:0px;
+	}
+
+
+	/* Bottom menu
+	* --------------------------------------- */
+	#infoMenu {
+		bottom: 80px;
+	}
+	#infoMenu li a {
+		color: #fff;
+		z-index: 999;
+	}
+	
+
+	
+
+.center {
+    margin-left: auto;
+    margin-right: auto;
+    width: 25%;
+}
+
+
+	</style>
+
+	<!--[if IE]>
+		<script type="text/javascript">
+			 var console = { log: function() {} };
+		</script>
+	<![endif]-->
+
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
+
+	<script type="text/javascript" src="{% static 'external/js/jquery.fullPage.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/vendors/jquery.slimscroll.min.js' %}"></script>
+	
+	<script type="text/javascript" src="{% static 'external/js/examples.js' %}"></script>
+	
+	
+
+	<script type="text/javascript">
+	     var serviceComments = {{ service_reports | safe }};
+		$(document).ready(function() {
+			$('#fullpage').fullpage({
+				anchors: ['firstPage', 'secondPage', '3rdPage', 'fourthPage'],
+				sectionsColor: ['white', '#1BBC9B', '#7E8F7C', 'white'],
+				css3: true
+			});
+		});
+		document.addEventListener('DOMContentLoaded', init, false);
+	</script>
+
+</head>
+<body>
+
+<select id="demosMenu">
+  <option selected>Choose Demo</option>
+  <option id="backgrounds">Background images</option>
+  <option id="backgroundVideo">Background video</option>
+  <option id="gradientBackgrounds">Gradient backgrounds</option>
+  <option id="looping">Looping</option>
+  <option id="noAnchor">No anchor links</option>
+  <option id="scrollingSpeed">Scrolling speed</option>
+  <option id="easing">Easing</option>
+  <option id="callbacks">Callbacks</option>
+  <option id="css3">CSS3</option>
+  <option id="continuous">Continuous scrolling</option>
+  <option id="normalScroll">Normal scrolling</option>
+  <option id="scrollBar">Scroll bar enabled</option>
+  <option id="scrolling">Scroll inside sections and slides</option>
+  <option id="navigationV">Vertical navigation dots</option>
+  <option id="navigationH">Horizontal navigation dots</option>
+  <option id="fixedHeaders">Fixed headers</option>
+  <option id="apple">Apple iPhone demo (animations)</option>
+  <option id="oneSection">One Single Section</option>
+  <option id="responsive">Responsive</option>
+  <option id="methods">Methods</option>
+</select>
+
+<div id="header">SerVizFront - Customer Service Visualization</div>
+<div id="footer"></div>
+
+<div id="topbar">
+	
+
+			<form id="search" action=".">	
+   	
+		    	<script> 
+		    	
+		    	function updateTheSentimentsAll()
+				{					
+					var prov1 = {{province1int|safe}};
+					var prov2 = {{province2int|safe}};
+					var prov3 = {{province3int|safe}};
+					var prov4 = {{province4int|safe}};
+	
+					updatingTheSentiments(prov1,prov2,prov3,prov4);
+				}
+
+	 			</script>
+	 			
+		    	<!--<input id="submit" class="search-input" type="submit"></button> -->
+		    	<button id="submit" class="search-input" type="button" onclick="handleSubmit(); updateTheSentimentsAll()">Submit</button>
+		    	<!-- <input id="industryInput" class="search-input" type="text" name="industries" placeholder="Industry"/> -->
+		    	<input id="supplierInput" class="search-input" type="text" name="suppliers" placeholder="Search, e.g absa"/>
+		    	<!--  <input id="supplierInput" class="search-input" type="text" name="suppliers" placeholder="Search, e.g absa" onkeypress="console.log('happy days'); event.preventDefault()"/> -->
+	
+		      	
+		      	
+		      	
+		      	<!--
+				<div id="industry" class="search">
+				  	 <input id="industryInput" class="search-input" type="text" name="industries" placeholder="Industry"/>
+				</div>
+				<div id="supplier" class="search">
+				  	 <input id="supplierInput" class="search-input" type="text" name="suppliers" placeholder="Supplier"/>				
+				</div>
+				-->
+				
+		      </form>
+</div>
+
+<div id="fullpage">
+	<div class="section " id="section0">
+		<div class="intro">
+			<h1>Hello Peter Visualized</h1>
+			<p>Your future is in your hands - Making a difference!</p>
+			<!-- container for displaying the map -->
+		   <div id="main">
+			    <div id="hellopetermapview">
+			        <div id="hellomap"></div>  
+			    </div> 
+			    <div id="timechartcontainer">
+					<div id="servicetime-chart" class="chart"> <div class="title">Hour Filter</div></div>		  
+	    		</div>
+				<div id="datechartcontainer">
+				    <div id="servicedate-chart" class="chart"><div class="title">Date Filter</div></div>  
+				</div>
+		    </div>
+		    
+		    <!-- <div id="hellocontrol">
+		     	<div id="histogramnote" align="center" >Hover over each box to see customer comment text. </div>
+		     	<table id="supplierstable"></table>
+		     	<div id="province-sentiment"></div>
+    		</div> -->	
+    		
+    		 <div id="hellocontrol">
+
+				    <table id="supplierstable"></table>
+				
+				<div class="col-sm-7">
+				    <div id="textreports"></div>
+				</div>
+				
+				<div class="col-sm-5">
+				    <div id ="myform">
+				
+				    <form action="MAILTO:someone@example.com" method="post" enctype="text/plain">
+
+							Name:<br>
+							
+							<input type="text" name="name" value="your name"><br>
+							
+							E-mail:<br>
+							
+							<input type="text" name="mail" value="your email"><br>
+							
+							Comment:<br>
+							
+							<input type="text" name="comment" value="your comment" size="50"><br><br>
+							
+							<input type="submit" value="Send">
+							
+							<input type="reset" value="Reset">
+		
+		   	</form>
+		</div>
+		    </div>
+
+    <!--<div id="province-sentiment"></div> -->
+
+    </div>
+			
+		</div>
+	</div>
+	<div class="section" id="section1">
+	    <div class="slide" id="slide1">
+			<div class="intro">
+				
+				
+				<style>
+				  		h1 {font-size: 1em}
+				  	</style>
+				  	
+				    <h1>Top 10 Branch Sentiment Summary </h1>
+				  	
+ 				
+ 				<form action="." method="post" id="submit"> {% csrf_token %}
+
+  				<div class = "box0"> </div>
+
+				<input type="submit" id="provinceselected">
+
+	 		
+	 		
+				<div class="container">
+					
+	
+				  <div class="col-sm-6">
+				  	
+				  	<div class="row">
+				  		
+				  <div class = "centre" >
+				  	<div class = "box1">  </div>
+				      Province1: <select name="Province1" id = "sub1">
+   								<option value="Gauteng">Gauteng </option>
+  								<option value="WesternCape">Western Cape</option>
+  								<option value="EasternCape">Eastern Cape</option>
+  								<option value="NorthernCape">Northern Cape</option> 
+  								<option value="FreeState">Free State</option>
+  								<option value="KZN">KZN</option>
+  								<option value="Limpopo">Limpopo</option> 
+  								<option value="Mpumalanga">Mpumalanga</option>
+  								<option value="NorthWest">North West</option> 
+  							</select>
+  					</div>	
+				  		
+				    <div class="col-sm-5">
+				      <h3>Positive Service Branches</h3>
+				      <div id="sentiment_div"></div>
+				      <canvas id="canvas_cloud"></canvas>
+				    </div>
+				    <div class="col-sm-5">
+				      <h3>Poor Service Branches</h3>
+				      <div id="sentiment_div2"></div>
+				      <canvas id="canvas_cloud2"></canvas>
+				    </div>
+				   <!-- <div class="col-sm-4">
+				      <h3>Column 3</h3>        
+				      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
+				      <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...</p>
+				    </div> -->
+				  </div>
+				  	
+				  </div>
+				  
+				  <div class="col-sm-6">
+				  	
+				  	<div class="row">
+				  		
+				  		
+				  		<div class = "centre" >
+				  			<div class = "box1">  </div>
+				    	Province2: <select name = "Province2" id = "sub2">  
+  								<option value="Gauteng">Gauteng </option>
+  								<option value="WesternCape">Western Cape</option>
+  								<option value="EasternCape">Eastern Cape</option>
+  								<option value="NorthernCape">Northern Cape</option> 
+  								<option value="FreeState">Free State</option>
+  								<option value="KZN">KZN</option>
+  								<option value="Limpopo">Limpopo</option> 
+  								<option value="Mpumalanga">Mpumalanga</option>
+  								<option value="NorthWest">North West</option> 
+  							</select>
+  						</div>
+				  		
+				    <div class="col-sm-5">
+				    	
+  						
+				      <h3>Positive Service Branches</h3>
+				      
+				      <div id="sentiment_divKZ"></div>
+				      <canvas id="canvas_cloudKZ"></canvas>
+				    </div>
+				    <div class="col-sm-5">
+				      <h3>Poor Service Branches</h3>
+				      <div id="sentiment_div2KZ"></div>
+				      <canvas id="canvas_cloud2KZ"></canvas>
+				    </div>
+				   <!-- <div class="col-sm-4">
+				      <h3>Column 3</h3>        
+				      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
+				      <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...</p>
+				    </div> -->
+				  </div>
+				  	
+				  </div>
+
+			  </div>
+			  
+			  
+			  <div class="container"> 
+			  	
+			   <div class="col-sm-6">
+				  	
+				  	<div class="row">
+				  		
+				  		<div class = "centre" >
+				  			<div class = "box1">  </div>
+				    	Province3: <select name = "Province3" id = "sub3">  
+  								<option value="Gauteng">Gauteng </option>
+  								<option value="WesternCape">Western Cape</option>
+  								<option value="EasternCape">Eastern Cape</option>
+  								<option value="NorthernCape">Northern Cape</option> 
+  								<option value="FreeState">Free State</option>
+  								<option value="KZN">KZN</option>
+  								<option value="Limpopo">Limpopo</option> 
+  								<option value="Mpumalanga">Mpumalanga</option>
+  								<option value="NorthWest">North West</option> 
+  							</select> 
+  							
+  						</div>
+				  		
+				    <div class="col-sm-5">
+  						
+				      <h3>Positive Service Branches</h3>
+				      <div id="sentiment_divEC"></div>
+				      <canvas id="canvas_cloudEC"></canvas>
+				    </div>
+				    <div class="col-sm-5">
+				      <h3>Poor Service Branches</h3>
+				      <div id="sentiment_div2EC"></div>
+				      <canvas id="canvas_cloud2EC"></canvas>
+				    </div>
+				   <!-- <div class="col-sm-4">
+				      <h3>Column 3</h3>        
+				      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
+				      <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...</p>
+				    </div> -->
+				  </div>
+				  	
+				  	
+				</div>
+			  	
+			  	
+			  	<div class="col-sm-6">
+				  				  	
+				  	<div class="row">
+				  		
+				  		<div class = "centre" >
+				  		<div class = "box1">  </div>
+				  		Province4: <select name = "Province4" id = "sub4">  
+  								<option value="Gauteng">Gauteng </option>
+  								<option value="WesternCape">Western Cape</option>
+  								<option value="EasternCape">Eastern Cape</option>
+  								<option value="NorthernCape">Northern Cape</option> 
+  								<option value="FreeState">Free State</option>
+  								<option value="KZN">KZN</option>
+  								<option value="Limpopo">Limpopo</option> 
+  								<option value="Mpumalanga">Mpumalanga</option>
+  								<option value="NorthWest">North West</option> 
+  							</select>
+  							
+  							</div>
+  							
+				    <div class="col-sm-5">
+				      <h3>Positive Service Branches</h3>
+				      <div id="sentiment_divCT"></div>
+				      <canvas id="canvas_cloudCT"></canvas>
+				    </div>
+				    <div class="col-sm-5">
+				      <h3>Poor Service Branches</h3>
+				      <div id="sentiment_div2CT"></div>
+				      <canvas id="canvas_cloud2CT"></canvas>
+				    </div>
+				   <!-- <div class="col-sm-4">
+				      <h3>Column 3</h3>        
+				      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
+				      <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...</p>
+				    </div> -->
+				  </div>
+				  	
+				  	
+				  </div>
+	 	
+			  </div>
+			  
+			  
+			  </form>
+			  
+			</div>
+		</div>
+		<script>
+	 		 			
+	 			var prov1 = {{province1int|safe}};
+	 			var prov2 = {{province2int|safe}};
+	 			var prov3 = {{province3int|safe}};
+	 			var prov4 = {{province4int|safe}};
+	 			
+	 			updatingTheSentiments(prov1,prov2,prov3,prov4);
+	 			
+	 			
+	 		</script>
+	 		
+	    <div class="slide" id="slide2">
+			<h1>Slide 2</h1>
+			<img src="imgs/iphone-blue.png" alt="iphone" id="iphone-two" />
+		</div>
+
+	</div>
+	
+	<div class="section" id="section2">
+		<div class="intro">
+			<h1>Tree mapping of complaints</h1>
+		</div>
+		
+	</div>
+		
+
+
+	<div class="section" id="section3">
+				 <div class="slide" id="slide3">
+				 	<div class="intro">
+    		
+						<div class="container-fluid">
+	
+							<div class="row">
+					        		<div class="col-sm-3 col-md-2 sidebar">
+										       
+										          <ul class="nav nav-sidebar">
+										          	<div class = "box1">  </div>
+										            <li><a href="">Gauteng</a></li>
+										            <li><a href="">Western Cape</a></li>
+										            <li><a href="">Eastern Cape</a></li>
+										            <li><a href="">Northern Cape</a></li>
+										            <li><a href="">Free State</a></li>
+										            <li><a href="">KwaZulu-Natal</a></li>
+										            <li><a href="">Limpompo</a></li>
+										            <li><a href="">Mpumalanga</a></li>
+										            <li><a href="">North West</a></li>
+										          </ul>
+					        		</div>
+					        
+					       			<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+									        									
+									          <div class="row placeholders">
+									            <div class="col-xs-6 col-sm-3 placeholder">
+									              <h3>Positive Service Branches</h3>
+				      									<div id="sentiment_div"></div>
+				      									<canvas id="canvas_cloud"></canvas>
+									            </div>
+									            <div class="col-xs-6 col-sm-3 placeholder">
+									              <h3>Poor Service Branches</h3>
+				      									<div id="sentiment_div2"></div>
+				      									<canvas id="canvas_cloud2"></canvas>
+									            </div>
+									            
+									            <div class="col-xs-6 col-sm-3 placeholder">
+									              <h3>Positive Service Branches</h3>
+				      									<div id="sentiment_divKZ"></div>
+				      									<canvas id="canvas_cloudKZ"></canvas>
+									            </div>
+									            <div class="col-xs-6 col-sm-3 placeholder">
+									              	<h3>Poor Service Branches</h3>
+				      								<div id="sentiment_div2KZ"></div>
+				      								<canvas id="canvas_cloud2KZ"></canvas>
+									            </div>
+									          </div>
+									          
+									          
+									          <div class="row placeholders">
+									            <div class="col-xs-6 col-sm-3 placeholder">
+											      <h3>Positive Service Branches</h3>
+											      <div id="sentiment_divEC"></div>
+											      <canvas id="canvas_cloudEC"></canvas>
+									            </div>
+									            <div class="col-xs-6 col-sm-3 placeholder">
+									              <h3>Poor Service Branches</h3>
+											      <div id="sentiment_div2EC"></div>
+											      <canvas id="canvas_cloud2EC"></canvas>
+									            </div>
+									            
+									            <div class="col-xs-6 col-sm-3 placeholder">
+									              <h3>Positive Service Branches</h3>
+											      <div id="sentiment_divCT"></div>
+											      <canvas id="canvas_cloudCT"></canvas>
+									            </div>
+									            <div class="col-xs-6 col-sm-3 placeholder">
+									              	<h3>Poor Service Branches</h3>
+												    <div id="sentiment_div2CT"></div>
+												    <canvas id="canvas_cloud2CT"></canvas>
+									            </div>
+									          </div>
+								</div>
+						
+								
+							</div>
+					</div>
+				 			
+				 			
+				 	
+			</div>
+		</div>
+		
+		
+	</div>
+      	
+</div>
+
+</body>
+</html>

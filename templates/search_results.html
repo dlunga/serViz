@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+	</head>
+
+	<body>
+		<p>You searched for: <strong>{{ query }}</strong></p>
+
+{% if suppliers %}
+    <p>Found {{ suppliers|length }} supplier{{ suppliers|pluralize }}.</p>
+    <ul>
+        {% for supplier in suppliers %}
+        	<li>{{ supplier.supplier_name}}</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No supplier matched your search criteria.</p>
+{% endif %}
+	</body>
+</html>

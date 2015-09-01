@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+	{% load staticfiles %}
+    {#<meta charset="utf-8">#}
+    <title>Data Filter</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}"/>
+    <script type="text/javascript" src="{% static 'lib/d3.js' %}"></script>
+    <script type="text/javascript" src="{% static 'external/data_filter.js' %}"></script>
+</head>
+
+<body>
+	
+{% if supplier_dict %}
+	<table>
+		{% for key in my_data %}
+			<tr><td>{{key}}</td></tr>   
+		{% endfor %}
+	</table>
+	
+ 	<table>
+		{% for k,val in supplier_dict %}
+			<tr><td>{{k}}</td><td>{{val}}</td></tr>   
+		{% endfor %}
+	</table>
+{% else %}
+    <p>No supplier matched your search criteria.</p>
+{% endif %}
+
+<div class="control-group">
+    <button onclick="load({% static 'my_data.json' %})">Load Data from JSON feed</button>
+</div>
+
+
+</body>
+
+</html>

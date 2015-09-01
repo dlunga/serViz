@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Customer Service Mapping</title>
+    {% load staticfiles %}
+    {#<meta charset="utf-8">#}
+    <title>Data Filter</title>
+    <!--<link rel="stylesheet" type="text/css" href="{% static 'css/localstyles.css' %}"/> -->
+    <script type="text/javascript" src="{% static 'lib/d3.js' %}"></script> 
+    <script type="text/javascript" src="{% static 'local/localcrossfilterv5.js' %}"></script> 
+    <script type="text/javascript" src="{% static 'external/crossfilter.v1.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/crossfilter.v1.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/d3.v3.min.js' %}"></script>	
+	<script type="text/javascript" src="{% static 'external/d3.v3.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/d3.v2.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/d3.v2.min.js' %}"></script>
+    <!--<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&region=ES"></script> -->
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/hellopeter.css' %}"/>
+    
+</head>
+<script>
+        var serviceComments = {{ service_reports | safe }};
+		document.addEventListener('DOMContentLoaded', init, false);
+		//document.addEventListener('DOMContentLoaded', initialize, false);	
+		//google.maps.event.addDomListener(window, 'load', init);
+</script>
+
+
+ <body>
+ 	
+ 	<div id="main">
+      <div id="mapview">
+      		<!--<div id="map-canvas"></div> -->
+        	<div id="map"></div>  
+      </div>
+     </div>
+      <!--<div  id="datasetRadio" class="dataset-buttons">
+        <input type="radio" value="historic" id="historicRadio" name="datasetRadio"><label for="historicRadio">Historical</label>
+        <input type="radio" value="streaming" id="streamingRadio" name="datasetRadio"><label for="streamingRadio">Streaming</label>
+      </div> -->
+    <div id="control">
+    	<div id="sortOrder"></div>
+        <div id="tweets"></div> 
+        <div id="cloudBox">
+            <div id="cloud"></div>
+        </div>
+    </div>
+    <!--<div id="chart"></div> -->
+ 			      
+    <div id="charts">
+		  <div id="servicetime-chart" class="chart">
+		    <div class="title">Service Time</div>
+		  </div>
+		  
+		   <div id="servicedate-chart" class="chart">
+		    <div class="title">Service Date</div>
+		  </div>  
+	</div>
+
+	<div id="lists">
+	  <div id="service-list" class="list"></div>
+	</div>
+ </body>
+</html>

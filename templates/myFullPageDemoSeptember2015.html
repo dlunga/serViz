@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+	
+		<style>
+
+	/* Style for our header texts
+	* --------------------------------------- */
+	h1{
+		font-size: 5em;
+		font-family: arial,helvetica;
+		color: #000000;
+		margin:0;
+		padding:0;
+	}
+	.intro p{
+		color: #fff;
+	}
+	
+	h2{
+		font-size: 2em;
+		font-family: arial,helvetica;
+		color: #000000;
+		margin:0;
+		padding:0;
+	}
+
+	/* Centered texts in each section
+	* --------------------------------------- */
+	.section{
+		text-align:center;
+	}
+
+	/* Fixed header and footer.
+	* --------------------------------------- */
+	#header, #footer{
+		position:fixed;
+		height: 50px;
+		display:block;
+		width: 100%;
+		background: #333;
+		z-index:9;
+		text-align:center;
+		color: #f2f2f2;
+		padding: 20px 0 0 0;
+	}
+
+	#header{
+		top:0px;
+	}
+	#footer{
+		bottom:0px;
+	}
+
+
+	/* Bottom menu
+	* --------------------------------------- */
+	#infoMenu {
+		bottom: 80px;
+	}
+	#infoMenu li a {
+		color: #fff;
+		z-index: 999;
+	}
+	
+
+	
+
+.center {
+    margin-left: auto;
+    margin-right: auto;
+    width: 25%;
+}
+
+
+.node {
+    cursor: pointer;
+  }
+
+  .overlay{
+      /*background-color:#EEE;*/
+      /*background-color:#8c9b8a;    */
+     background-color:#1BBC9B;
+  }
+   
+  .node circle {
+    fill: #fff;
+    stroke: steelblue;
+    stroke-width: 1.5px;
+  }
+   
+  .node text {
+    font-size:10px; 
+    font-family:sans-serif;
+  }
+   
+  .link {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 1.5px;
+  }
+
+  .templink {
+    fill: none;
+    stroke: red;
+    stroke-width: 3px;
+  }
+
+  .ghostCircle.show{
+      display:block;
+  }
+
+  .ghostCircle, .activeDrag .ghostCircle{
+       display: none;
+  }
+
+
+	</style>
+
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>Customer SerViz</title>
+	{% load staticfiles %}
+
+	<meta name="Resource-type" content="Document" />
+	<!--Bootsrap links -->
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+  	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+ 	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+	
+	<link rel="stylesheet" type="text/css" href="{% static 'external/css3/jquery.fullPage.css' %}"/>
+	<link rel="stylesheet" type="text/css" href="{% static 'external/css3/examples.css' %}"/>
+	<link rel="stylesheet" type="text/css" href="{% static 'css/hellopeterfullpage.css' %}"/>
+	<link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}"/> 
+	<!-- <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}"/>  -->
+	
+	<script type="text/javascript" src="{% static 'external/wordfreq.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/wordfreq.worker.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/wordcloud2.js-master/src/wordcloud2.js' %}"></script>
+	<script type="text/javascript" src="https://www.google.com/jsapi"></script> 
+    <script type="text/javascript" src="{% static 'lib/d3.js' %}"></script> 
+    <script type="text/javascript" src="{% static 'local/hellopeterfullpage.js' %}"></script>
+    <script type="text/javascript" src="{% static 'local/dndTree.js' %}"></script> 
+    <script type="text/javascript" src="{% static 'external/crossfilter.v1.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/crossfilter.v1.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/d3.v3.min.js' %}"></script>	
+	<script type="text/javascript" src="{% static 'external/d3.v3.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/d3.v2.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/d3.v2.min.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/markerclusterer.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/d3.layout.cloud.js' %}"></script>
+
+	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+	
+	
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
+
+	<script type="text/javascript" src="{% static 'external/js/jquery.fullPage.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/vendors/jquery.slimscroll.min.js' %}"></script>
+	
+	<script type="text/javascript" src="{% static 'external/js/examples.js' %}"></script>
+	
+	
+
+	<script type="text/javascript" src="{% static 'external/js/amcharts.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/js/serial.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/js/light.js' %}"></script>
+	<script type="text/javascript" src="{% static 'external/js/amstock.js' %}"></script>
+
+	<script type="text/javascript">
+	     var serviceComments = {{ service_reports | safe }};
+		$(document).ready(function() {
+			$('#fullpage').fullpage({
+				anchors: ['firstPage', 'secondPage', '3rdPage', 'FourthPage'],
+				sectionsColor: ['white', '#1BBC9B', '#1BBC9B', '#1BBC9B'],
+				css3: true,
+				navigation: true,
+				navigationPosition: 'right',
+				slidesNavigation: true,
+				normalScrollElements: '#section0, #section1, #section2'
+				//autoScrolling: false
+			});
+		});
+		document.addEventListener('DOMContentLoaded', init, false);
+	</script>
+
+</head>
+<body>
+	
+
+<select id="demosMenu">
+  <option selected>Choose Demo</option>
+  <option id="backgrounds">Background images</option>
+  <option id="backgroundVideo">Background video</option>
+  <option id="gradientBackgrounds">Gradient backgrounds</option>
+  <option id="looping">Looping</option>
+  <option id="noAnchor">No anchor links</option>
+  <option id="scrollingSpeed">Scrolling speed</option>
+  <option id="easing">Easing</option>
+  <option id="callbacks">Callbacks</option>
+  <option id="css3">CSS3</option>
+  <option id="continuous">Continuous scrolling</option>
+  <option id="normalScroll">Normal scrolling</option>
+  <option id="scrollBar">Scroll bar enabled</option>
+  <option id="scrolling">Scroll inside sections and slides</option>
+  <option id="navigationV">Vertical navigation dots</option>
+  <option id="navigationH">Horizontal navigation dots</option>
+  <option id="fixedHeaders">Fixed headers</option>
+  <option id="apple">Apple iPhone demo (animations)</option>
+  <option id="oneSection">One Single Section</option>
+  <option id="responsive">Responsive</option>
+  <option id="methods">Methods</option>
+</select>
+
+<div id="header">SerVizFront - Customer Service Visualization</div>
+<div id="footer"></div>
+
+<div id="topbar">
+	
+            <div id="promo"><a href="" target="_blank"><img src="{% static "images/customerservice.jpg" %}" class="logo-image"></a></div>
+			<form id="search" action=".">	
+   	
+		    	<!-- <script> 
+		    	
+		    	function updateTheSentimentsAll()
+				{					
+					var prov1 = {{province1int|safe}};
+					var prov2 = {{province2int|safe}};
+					var prov3 = {{province3int|safe}};
+					var prov4 = {{province4int|safe}};
+	
+					updatingTheSentiments(prov1,prov2,prov3,prov4);
+				}
+
+	 			</script> -->
+	 			
+		    	<!--<input id="submit" class="search-input" type="submit"></button> -->
+		    	<button id="submit" class="search-input" type="button" onclick="handleSubmit()">Submit</button>
+		    	<!-- <button id="submit" class="search-input" type="button" onclick="handleSubmit(); updateTheSentimentsAll()">Submit</button> -->
+		    	<!-- <input id="industryInput" class="search-input" type="text" name="industries" placeholder="Industry"/> -->
+		    	<input id="supplierInput" class="search-input" type="text" name="suppliers" placeholder="Search, e.g absa"/>
+		    	<!--  <input id="supplierInput" class="search-input" type="text" name="suppliers" placeholder="Search, e.g absa" onkeypress="console.log('happy days'); event.preventDefault()"/> -->
+	
+		      	
+		      	
+		      	
+		      	<!--
+				<div id="industry" class="search">
+				  	 <input id="industryInput" class="search-input" type="text" name="industries" placeholder="Industry"/>
+				</div>
+				<div id="supplier" class="search">
+				  	 <input id="supplierInput" class="search-input" type="text" name="suppliers" placeholder="Supplier"/>				
+				</div>
+				-->
+				
+		      </form>
+</div>
+
+<div id="fullpage">
+	<div class="section " id="section0">
+		<div class="intro">
+			<!-- container for displaying the map -->
+		   <div id="main">
+			    
+			    <div id="chartcontainerseptember">
+					<div id="chartdivseptember"></div>
+				</div>
+				
+			    
+			    <div id="timechartcontainer">
+					<div id="servicetime-chart" class="chart"> <div class="title">Hour Filter</div></div>		  
+	    		</div>
+				<div id="datechartcontainer">
+				    <div id="servicedate-chart" class="chart"><div class="title">Date Filter</div></div>  
+				</div>
+				
+				<div id="hellopetermapviewseptember">
+			        <div id="hellomap"></div>  
+			    </div> 
+			   
+		    </div>
+		    
+		    <!-- <div id="hellocontrol">
+		     	<div id="histogramnote" align="center" >Hover over each box to see customer comment text. </div>
+		     	<table id="supplierstable"></table>
+		     	<div id="province-sentiment"></div>
+    		</div> -->	
+    		
+    		 <div id="hellocontrol" style = "overflow-y: scroll">
+
+				    <table id="supplierstable"></table>
+				    
+				    
+				    <div id="client_roll"></div>
+				    <div id="date_roll"></div>
+				    <div id = "branch_roll"> </div>
+				    <div id="textreports"></div>
+						
+
+    </div>
+			
+	</div>
+	</div>
+
+	
+	
+	<div class="section" id="section1">
+	    <div class="slide" id="slide1">
+	    	<!-- <div> <div class = "box2"> </div>  <div class = "box3"> positive </div> </div> 
+	    	<div> <div class = "box1">  </div> <div class = "box3"> negative </div> </div>  -->
+	    	
+	    
+	    			 	<div class="intro">
+    			<!-- <h2>Top 10 Branches in 1 Province Sentiment Summary  </h2> -->   
+						<div class="container-fluid">
+												       	
+							<div class="row">
+								
+									<div class="col-sm-3 col-md-2 sidebar">
+      												        <ul class="nav nav-sidebar">
+												          	<li class="active"><a href="#">Select One Province <span class="sr-only">(current)</span></a></li>
+					  										<li><a id="prov1a" href="#" onclick="placeProvinceInList(1);return false;">Gauteng</a></li>
+												            <li><a id="prov2a" href="#" onclick="placeProvinceInList(2);return false;">Western Cape</a></li>
+												            <li><a id="prov3a" href="#" onclick="placeProvinceInList(3);return false;">Eastern Cape</a></li>
+												            <li><a id="prov4a" href="#" onclick="placeProvinceInList(4);return false;">Northern Cape</a></li>
+												            <li><a id="prov5a" href="#" onclick="placeProvinceInList(5);return false;">Free State</a></li>
+												            <li><a id="prov6a" href="#" onclick="placeProvinceInList(6);return false;">KwaZulu Natal</a></li>
+												            <li><a id="prov7a" href="#" onclick="placeProvinceInList(7);return false;">Limpopo</a></li>
+												            <li><a id="prov8a" href="#" onclick="placeProvinceInList(8);return false;">Mpumalanga</a></li>
+												            <li><a id="prov9a" href="#" onclick="placeProvinceInList(9);return false;">North West</a></li>
+															<input type="submit" id="provinceselected2" onclick="updatingTheSentimentsLinks(); clearTheList()">
+												          </ul>
+							        </div>
+	
+					       			<!-- <div class="col-sm-9"> -->
+					       				
+					       						<div class="row placeholders">
+					       							
+					       							
+					       							<div class="col-sm-4">
+									              <!-- <div class = "box2"> positive </div>  
+					       							<div class = "box1"> negative </div>  -->
+				      									<div id="sentiment_divOneGraph"></div>
+				      									<canvas id="canvas_cloudOneGraph"></canvas>
+				      								</div>
+				      									
+				      									<div class="col-sm-4">
+				      										 <!-- <div class = "box3">  </div>  
+					       							<div class = "box3"> </div> -->
+					      									<div id="sentiment_div2OneGraph"></div>
+					      									<canvas id="canvas_cloud2OneGraph"></canvas>
+									            		</div>
+									            </div>
+									            <!-- <div class="row placeholders"> -->
+									              <!-- <h3>Poor Service Branches</h3> -->
+									              
+					       				       
+								<!-- </div> -->
+						
+								
+									<!-- </div> -->
+							
+		
+			
+					</div>
+				 			
+				 			
+				 	
+			</div>
+		</div>
+	
+		</div>
+	
+		<script>
+	 		 			
+	 			var prov1 = {{province1int|safe}};
+	 			var prov2 = {{province2int|safe}};
+	 			var prov3 = {{province3int|safe}};
+	 			var prov4 = {{province4int|safe}};
+	 			
+	 			updatingTheSentiments(prov1,prov2,prov3,prov4);
+	 			
+	 			// createPieChartData();
+	 			
+	 		</script>
+	 		
+	 	
+	 	
+	 	 <div class="slide" id="slide2">
+	    			
+	    	    	<!-- <h2>Top 10 Branches in 4 Provinces Sentiment Summary </h2> -->
+						 	<div class="intro">
+    			<!-- <h2>Top 10 Branches in 4 Provinces Sentiment Summary </h2> -->
+						<div class="container-fluid">
+	    										
+							<div class="row">
+								
+									<div class="col-sm-3 col-md-2 sidebar">
+      												        <ul class="nav nav-sidebar">
+												          	<li class="active"><a href="#">Select Four Provinces <span class="sr-only">(current)</span></a></li>
+					  										<li><a id="prov1" href="#" onclick="placeProvinceInList(1);return false;">Gauteng</a></li>
+												            <li><a id="prov2" href="#" onclick="placeProvinceInList(2);return false;">Western Cape</a></li>
+												            <li><a id="prov3" href="#" onclick="placeProvinceInList(3);return false;">Eastern Cape</a></li>
+												            <li><a id="prov4" href="#" onclick="placeProvinceInList(4);return false;">Northern Cape</a></li>
+												            <li><a id="prov5" href="#" onclick="placeProvinceInList(5);return false;">Free State</a></li>
+												            <li><a id="prov6" href="#" onclick="placeProvinceInList(6);return false;">KwaZulu Natal</a></li>
+												            <li><a id="prov7" href="#" onclick="placeProvinceInList(7);return false;">Limpopo</a></li>
+												            <li><a id="prov8" href="#" onclick="placeProvinceInList(8);return false;">Mpumalanga</a></li>
+												            <li><a id="prov9" href="#" onclick="placeProvinceInList(9);return false;">North West</a></li>
+															<input type="submit" id="provinceselected0" onclick="updatingTheSentimentsLinks(); clearTheList()">
+												          </ul>
+							        </div>
+							        
+							        
+	
+					       			<div class="col-sm-9">
+					       				
+									          <div class="row placeholders">
+									          	
+									          	<!-- <div class="col-sm-3">
+									              <h3>Positive Service Branches</h3>
+				      									
+									            </div> -->		
+									           							          	
+									          	
+									            <div class="col-sm-3">
+									              <!-- <h3>Positive Service Branches</h3> -->
+				      									<div id="sentiment_div"></div>
+				      									<canvas id="canvas_cloud"></canvas>
+									            </div>
+									            <div class="col-sm-3">
+									              <!-- <h3>Poor Service Branches</h3> -->
+				      									<div id="sentiment_div2"></div>
+				      									<canvas id="canvas_cloud2"></canvas>
+									            </div>
+									            
+
+									            <div class="col-sm-3">
+									              <!-- <h3>Positive Service Branches</h3> -->
+				      									<div id="sentiment_divKZ"></div>
+				      									<canvas id="canvas_cloudKZ"></canvas>
+									            </div>
+									            
+									            
+									            <div class="col-sm-3">
+									              	<!-- <h3>Poor Service Branches</h3> -->
+				      								<div id="sentiment_div2KZ"></div>
+				      								<canvas id="canvas_cloud2KZ"></canvas>
+				      								
+				      								
+									            </div>
+									            
+									            
+									           
+									            
+									          </div>
+									          
+									          
+									          <div class="row placeholders">
+									          	
+									            <div class="col-xs-6 col-sm-3 placeholder">
+											      <!-- <h3>Positive Service Branches</h3> -->
+											      <div id="sentiment_divEC"></div>
+											      <canvas id="canvas_cloudEC"></canvas>
+									            </div>
+									            <div class="col-xs-6 col-sm-3 placeholder">
+									              <!-- <h3>Poor Service Branches</h3> -->
+											      <div id="sentiment_div2EC"></div>
+											      <canvas id="canvas_cloud2EC"></canvas>
+									            </div>
+									            
+									            <div class="col-xs-6 col-sm-3 placeholder">
+									              <!-- <h3>Positive Service Branches</h3> -->
+											      <div id="sentiment_divCT"></div>
+											      <canvas id="canvas_cloudCT"></canvas>
+									            </div>
+									            <div class="col-xs-6 col-sm-3 placeholder">
+									              	<!-- <h3>Poor Service Branches</h3> -->
+												    <div id="sentiment_div2CT"></div>
+												    <canvas id="canvas_cloud2CT"></canvas>
+									            </div>
+									          </div>
+									          
+									          
+								</div>
+						
+								
+							</div>
+							
+		
+			
+					</div>
+				 			
+				 			
+				 	
+			</div>
+	    		 	
+
+	</div>
+	 	
+	 	
+	 		
+	 	<div class="slide" id="slide3">
+			
+			<div class="intro">
+    			
+    			<!-- <h2>Pie charts</h2>
+    			 <script type="text/javascript">
+      							google.setOnLoadCallback(drawPie3dChart());
+    			</script> -->
+ 
+ 			<div class = "row"> 
+ 				
+							<!-- <h2>Sentiment by province</h2> -->
+							
+							<div class="col-sm-4">
+								<!-- <div id="piechart_3d" style="width: 537px; height: 355px;"></div>	 -->
+								<div id="province-sentiment"></div>
+								<!-- <div id = "pos_pie_chrt" ></div> -->
+							</div>
+							
+							<div class="col-sm-4" >
+								<div id = "neg_pie_chrt"></div>
+							</div>
+							
+							<!-- <div id="piechart_3d" style="width: 900px; height: 500px;"></div> -->
+			
+			</div>
+			
+			<div class = "row">
+				<!--<h2>Sentiment by industry</h2> -->
+				
+				<div class="col-sm-4">
+						<div id = "pos_pie_chrt_ind"></div>
+				</div>
+							
+				<div class="col-sm-4">
+						<div id = "neg_pie_chrt_ind"></div>
+				</div>
+				
+				
+			</div>
+    			
+    			
+		</div>	
+				
+	</div>
+	 		
+	   
+	
+	</div>
+	
+	
+
+	<div class="section" id="section2">
+		<div class="intro">
+			<!--<h2>Customer Service Response Page</h2>-->
+ 	
+ 	<!-- <div class="row"> -->
+ 		
+ 		<div class="col-sm-7">
+ 			<div id="tree-container"></div>
+ 			
+ 		</div>
+ 		
+ 		<div class="col-sm-5" >
+ 			
+ 			<!-- <div id = "treeform"> -->
+			
+			<div class="row">
+				<!-- <div id="piechart_3d" style="width: 900px; height: 500px;"></div> -->
+			</div>
+			
+				<div class="row">
+				    		<div id ="myform">
+				
+				    			<form action="MAILTO:someone@example.com" method="post" enctype="text/plain">
+
+									Name:<br><input type="text" name="Name" style="color:black;" size="42"><br><br>
+									
+									E-mail:<br><input type="text" name="Mail" style="color:black;" size="42"><br><br>
+									
+									Comment:<br><input type="text" name="comment" style="line-height:2.5em; color:black;" size="42"><br><br>
+									
+									
+								
+									<input type="submit" value="Send">
+									
+									<input type="reset" value="Reset">
+		
+		   					</form>
+						</div>
+		    	</div>
+				
+			
+			<!-- </div> -->
+		
+ 		</div>
+ 	<!-- </div> -->
+			
+			<script> 
+
+			var the_data = 	{{js_data1|safe}};
+			theTree(the_data);	
+			</script>
+
+
+		</div>
+		
+	</div>
+		
+		 	
+</div>
+	<script>
+var chartData1 = [];
+var chartData2 = [];
+var chartData3 = [];
+var chartData4 = [];
+
+generateChartData();
+
+function generateChartData() {
+  var firstDate = new Date();
+  firstDate.setDate( firstDate.getDate() - 500 );
+  firstDate.setHours( 0, 0, 0, 0 );
+
+  for ( var i = 0; i < 500; i++ ) {
+    var newDate = new Date( firstDate );
+    newDate.setDate( newDate.getDate() + i );
+
+    var a1 = Math.round( Math.random() * ( 40 + i ) ) + 100 + i;
+    var b1 = Math.round( Math.random() * ( 1000 + i ) ) + 500 + i * 2;
+
+    var a2 = Math.round( Math.random() * ( 100 + i ) ) + 200 + i;
+    var b2 = Math.round( Math.random() * ( 1000 + i ) ) + 600 + i * 2;
+
+    var a3 = Math.round( Math.random() * ( 100 + i ) ) + 200;
+    var b3 = Math.round( Math.random() * ( 1000 + i ) ) + 600 + i * 2;
+
+    var a4 = Math.round( Math.random() * ( 100 + i ) ) + 200 + i;
+    var b4 = Math.round( Math.random() * ( 100 + i ) ) + 600 + i;
+
+    chartData1.push( {
+      date: newDate,
+      value: a1,
+      volume: b1
+    } );
+    chartData2.push( {
+      date: newDate,
+      value: a2,
+      volume: b2
+    } );
+    chartData3.push( {
+      date: newDate,
+      value: a3,
+      volume: b3
+    } );
+    chartData4.push( {
+      date: newDate,
+      value: a4,
+      volume: b4
+    } );
+  }
+}
+
+var chart = AmCharts.makeChart( "chartdivseptember", {
+  type: "stock",
+  "theme": "light",  
+
+  dataSets: [ {
+      title: "first data set",
+      fieldMappings: [ {
+        fromField: "value",
+        toField: "value"
+      }, {
+        fromField: "volume",
+        toField: "volume"
+      } ],
+      dataProvider: chartData1,
+      categoryField: "date"
+    },
+
+    {
+      title: "second data set",
+      fieldMappings: [ {
+        fromField: "value",
+        toField: "value"
+      }, {
+        fromField: "volume",
+        toField: "volume"
+      } ],
+      dataProvider: chartData2,
+      categoryField: "date"
+    },
+
+    {
+      title: "third data set",
+      fieldMappings: [ {
+        fromField: "value",
+        toField: "value"
+      }, {
+        fromField: "volume",
+        toField: "volume"
+      } ],
+      dataProvider: chartData3,
+      categoryField: "date"
+    },
+
+    {
+      title: "fourth data set",
+      fieldMappings: [ {
+        fromField: "value",
+        toField: "value"
+      }, {
+        fromField: "volume",
+        toField: "volume"
+      } ],
+      dataProvider: chartData4,
+      categoryField: "date"
+    }
+  ],
+
+  panels: [ {
+
+      showCategoryAxis: false,
+      title: "Value",
+      percentHeight: 70,
+
+      stockGraphs: [ {
+        id: "g1",
+
+        valueField: "value",
+        comparable: true,
+        compareField: "value",
+        balloonText: "[[title]]:<b>[[value]]</b>",
+        compareGraphBalloonText: "[[title]]:<b>[[value]]</b>"
+      } ],
+
+      stockLegend: {
+        periodValueTextComparing: "[[percents.value.close]]%",
+        periodValueTextRegular: "[[value.close]]"
+      }
+    },
+
+    {
+      title: "Volume",
+      percentHeight: 30,
+      stockGraphs: [ {
+        valueField: "volume",
+        type: "column",
+        showBalloon: false,
+        fillAlphas: 1
+      } ],
+
+
+      stockLegend: {
+        periodValueTextRegular: "[[value.close]]"
+      }
+    }
+  ],
+
+  chartScrollbarSettings: {
+    graph: "g1"
+  },
+
+  chartCursorSettings: {
+    valueBalloonsEnabled: true,
+    fullWidth: true,
+    cursorAlpha: 0.1,
+    valueLineBalloonEnabled: true,
+    valueLineEnabled: true,
+    valueLineAlpha: 0.5
+  },
+
+  periodSelector: {
+    position: "left",
+    periods: [ {
+      period: "MM",
+      selected: true,
+      count: 1,
+      label: "1 month"
+    }, {
+      period: "YYYY",
+      count: 1,
+      label: "1 year"
+    }, {
+      period: "YTD",
+      label: "YTD"
+    }, {
+      period: "MAX",
+      label: "MAX"
+    } ]
+  },
+
+  dataSetSelector: {
+    position: "left"
+  },
+  "export": {
+    "enabled": true
+  }
+} );
+		
+	</script>
+</body>
+</html>
